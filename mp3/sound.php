@@ -30,7 +30,8 @@ if($mp3 == "1"){
 
 //Or let 'er rip with checking if the file exists
 if(file_exists("sounds/$mp3.mp3")){
-    shell_exec($player.' sounds/'.$mp3.'.mp3');
+  $escaped = substr(escapeshellarg(' sounds/'.$mp3.'.mp3'),1,-1);
+    shell_exec($player.$escaped);
     die();
 }else{
   die();
