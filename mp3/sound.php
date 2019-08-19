@@ -22,17 +22,21 @@ if ($os  === 'WIN') {
 }
 
 
-//You can either explicitly state which keywords you're looking for...
+//IMPORTANT NOTE: By far, by far, by far the BEST way to do this is to either use a switch statement or if/eles statements as below
+//to explicitly link a GET request to a specific mp3 file
 if($mp3 == "1"){
     shell_exec($player.' sounds/coin1.mp3');
     die();
 }
 
-//Or let 'er rip with checking if the file exists
-if(file_exists("sounds/$mp3.mp3")){
-  $escaped = substr(escapeshellarg(' sounds/'.$mp3.'.mp3'),1,-1);
-    shell_exec($player.$escaped);
-    die();
-}else{
-  die();
-}
+//If you are on a closed network and you really want to just grab the file name from GET, that's fine, but please consider using the above
+//option.
+
+// //Or let 'er rip with checking if the file exists
+// if(file_exists("sounds/$mp3.mp3")){
+//   $escaped = substr(escapeshellarg(' sounds/'.$mp3.'.mp3'),1,-1);
+//     shell_exec($player.$escaped);
+//     die();
+// }else{
+//   die();
+// }
