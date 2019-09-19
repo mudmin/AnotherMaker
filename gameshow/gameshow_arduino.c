@@ -1,10 +1,3 @@
-//Please note: This code is not made to be "fancy".  That explaination got edited out of the video.
-//I want this to be something that is easy to understand and step through
-//If you know how to use structs, arrays, pointers, whatever, go for it.
-//There are much "neater" ways to write this code, but even though I broke the
-//DRY (Don't Repeat Yourself) rule, I did it to really break out the logic so even newer
-//Arduino programmers can see what I'm doing.
-
 #include <RCSwitch.h>
 #include <CuteBuzzerSounds.h>
 //Install the RCSwitch and CuteBuzzerSounds libraries from the Arduino Library Manager
@@ -81,36 +74,25 @@ void loop() {
 
     if(rec == 5509388){ //button b - Buttons unlocked!
       state = 1;
+
+      //if you comment in the line below, the lights will blink 3 times showing the contestants that it
+      //is ok to buzz in. This is 2 places in the code.
+      blinkToGo();
+
+      //This function resets the LEDs. Take a look at it at the bottom of the code.
+      resetLeds();
       cute.play(S_HAPPY_SHORT);
         Serial.println("State set to 1. Locked and Loaded!");
     }
 
     if(rec == 5509424){ //button c - Let the remaining people try!!
-      //Let's reset the LEDs. If someone has already buzzed in, we want their LED to be off
-      //If they haven't, we want it to be on.
-      if(redAvail == 1){
-        digitalWrite(red,HIGH);
-      }else{
-        digitalWrite(red,LOW);
-      }
 
-      if(yellowAvail == 1){
-        digitalWrite(yellow,HIGH);
-      }else{
-        digitalWrite(yellow,LOW);
-      }
+      //if you comment in the line below, the lights will blink 3 times showing the contestants that it
+      //is ok to buzz in. This is 2 places in the code.
+      blinkToGo();
 
-      if(blueAvail == 1){
-        digitalWrite(blue,HIGH);
-      }else{
-        digitalWrite(blue,LOW);
-      }
-
-      if(greenAvail == 1){
-        digitalWrite(green,HIGH);
-      }else{
-        digitalWrite(green,LOW);
-      }
+      //This function resets the LEDs. Take a look at it at the bottom of the code.
+      resetLeds();
       state = 1;
       cute.play(S_HAPPY_SHORT);
         Serial.println("State set to 1. Available Players can buzz!!!");
@@ -213,6 +195,20 @@ void loop() {
 
 }
 
+void blinkToGo(){
+  for (int i = 0; i < 3; i++) {
+    digitalWrite(red,HIGH);
+    digitalWrite(yellow,HIGH);
+    digitalWrite(green,HIGH);
+    digitalWrite(blue,HIGH);
+    delay(100);
+    digitalWrite(red,LOW);
+    digitalWrite(yellow,LOW);
+    digitalWrite(green,LOW);
+    digitalWrite(blue,LOW);
+    delay(100);
+  }
+}
 void soundSamples(){
   //Sound examples
   //Comment this section in to hear all the sounds and see the names on the serial monitor
@@ -276,4 +272,32 @@ void soundSamples(){
   Serial.println("FART3");
     cute.play(S_FART3);
   delay(500);
+}
+
+void resetLeds(){
+  //Let's reset the LEDs. If someone has already buzzed in, we want their LED to be off
+  //If they haven't, we want it to be on.
+  if(redAvail == 1){
+    digitalWrite(red,HIGH);
+  }else{
+    digitalWrite(red,LOW);
+  }
+
+  if(yellowAvail == 1){
+    digitalWrite(yellow,HIGH);
+  }else{
+    digitalWrite(yellow,LOW);
+  }
+
+  if(blueAvail == 1){
+    digitalWrite(blue,HIGH);
+  }else{
+    digitalWrite(blue,LOW);
+  }
+
+  if(greenAvail == 1){
+    digitalWrite(green,HIGH);
+  }else{
+    digitalWrite(green,LOW);
+  }
 }
