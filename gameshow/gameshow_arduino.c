@@ -1,3 +1,10 @@
+//Please note: This code is not made to be "fancy".  That explaination got edited out of the video.
+//I want this to be something that is easy to understand and step through
+//If you know how to use structs, arrays, pointers, whatever, go for it.
+//There are much "neater" ways to write this code, but even though I broke the
+//DRY (Don't Repeat Yourself) rule, I did it to really break out the logic so even newer
+//Arduino programmers can see what I'm doing.
+
 #include <RCSwitch.h>
 #include <CuteBuzzerSounds.h>
 //Install the RCSwitch and CuteBuzzerSounds libraries from the Arduino Library Manager
