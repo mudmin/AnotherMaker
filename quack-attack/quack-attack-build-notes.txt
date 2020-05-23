@@ -1,0 +1,48 @@
+Hey I hope you have fun with this. Don't shoot your eye out.
+
+Physical Building Notes
+I used 5mm LEDs (https://amzn.to/3gkUEfk) with little metal LED holders (https://amzn.to/2TvnzTO)
+I really prefer these HAPP-style buttons - https://amzn.to/36owiMY
+Happ buttons are drilled with 1 1/8" drill bits.  Don't get the really aggressive Bosch ones.  Get this style.  https://amzn.to/3bZ478m
+I used a combination of hot glue and 2 flat head #4 screws to attach the buttons to the ducks
+
+Wire as follows
+
+Buttons
+One side of button to pin 1 (3.3v) and the other side to the pin below
+Duck 0 - Pin 3
+Duck 1 - Pin 5
+Duck 2 - Pin 7
+Duck 3 - Pin 11
+Duck 4 - Pin 15
+
+LEDs
+Shorter leg of each of the LEDs to ground.
+Longer leg to the pin through a 220 ohm or so resistor
+Duck 0 - Pin 8
+Duck 1 - Pin 10
+Duck 2 - Pin 12
+Duck 3 - Pin 16
+Duck 4 - Pin 18
+
+Node-Red
+Before the sketch will run, you will need to add the following nodes through "Manage Palette"
+- node-red-contrib-counter
+- node-red-contrib-looptimer
+- node-red-dashboard
+- node-red-node-pi-gpio
+
+To import the node red code, copy the entire contents of quack-attack-node-red.json to your clipboard.  Go into node-red
+and go to Import->(clipboard) - Paste and hit okay.
+
+Dashboard
+To view the UI, visit http://your.pi.ip.address:1880/ui in any web browser on your network
+If you are on the pi itself, open the web browser and visit http://127.0.0.1:1880/ui
+
+Playing Sounds
+If you want to play sounds on the pi itself, you will need to install mpg123 from the terminal
+sudo apt-get install mpg123
+
+Choose whatever sound effects you want for quack and splat and copy quack.mp3 and splat.mp3 to
+/home/dietpi/quack.mp3 and /home/dietpi/splat.mp3
+Edit your path for your own configuration if you're using Raspbian or another OS.
