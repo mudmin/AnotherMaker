@@ -1,4 +1,6 @@
-const int doorbell = A15;           //current sensor connected to analog15 and ground
+// https://youtube.com/AnotherMaker
+// https://github.com/mudmin/AnotherMaker
+const int doorbell = 34;            //current sensor connected to pin 34 and ground
 int senseDoorbell = 0;              //variable to hold doorbell sensor reading
 int debounce = 1000;                //only allow one DingDong per second
 unsigned long currentMillis = 0;    //how many milliseconds since the Arduino booted
