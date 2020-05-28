@@ -1,0 +1,42 @@
+The weird parts:
+I'm not using a library to connect between the 2 boards, so I'm sending weird octal and hex codes. Because of this some things are kind of weird in the code.
+Codes look like this...
+//volume
+sendCommand(0x06, 0, 5);
+0x06 tells it to change the volume, 0 is a low byte and needs to be there. Volume numbers are between 5 and 30. Because it's an octal you probably don't want to use volumes that end in 8 or 9.  Weird. I know.
+
+//equalizer
+  sendCommand(0x07, 0, 5);  //I thin there are 7 modes
+
+The main one is playing tracks.  Before I play a track, I set the volume. I've had glitches make it go to full volume, so I always set it first. Even without an amp, it's LOUD.
+
+Ok, so it gets even weirder.  Files need to begin with 4 numbers, but ending 8s and 9s seem to screw it up, soooo.  The file can have whatever after the 0001 so 0001FavoriteJoke.mp3 is fine.
+
+*** all of the files go on a fat32 formatted sd card inside a folder called (all lowercase) mp3
+
+Picking up the phone plays an mp3 file just so you know something will happen.  That file is...
+0015whatever.mp3
+
+Numbers 1-7 on the keypad are 0001-0007 respectively
+numbers 8-0 are 0010,0011,0012
+* is 0013
+# is 0014
+
+Hanging up the phone shuts off the sound.
+Pushing a number cancels the existing track and jumps right to the next one. Pretty slick, actually.
+
+
+
+The code:
+https://pastebin.com/TbA5MNLz
+
+For reference, it's this ESP32 Board
+https://www.aliexpress.com/item/ESP32-ESP-32-Development-Board-Wireless-WiFi-Bluetooth-Dual-Core-CP2104-Filters-Power-Module-2-4GHz/32992390199.html
+
+Connected to this MP3 Player
+https://www.aliexpress.com/item/1PCS-Mini-MP3-Player-Module-with-Simplified-Output-Speaker-MP3-TF-16P-for-Arduino-UNO/32648794460.html
+
+The MP3 Player gets 5v, Ground, RX and TX from the ESP32
+Rx and TX are a serial connection using pins 16,17 of the esp. (line 62 of the code)
+
+The code is pretty well commented explaining where all the wires go if you build another one or modify this one.
