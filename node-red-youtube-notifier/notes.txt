@@ -1,0 +1,10 @@
+I had mariadb on my pi so I'm using that database.  Otherwise, you can use any database that you have remote access to.
+
+Here is a link of how to install a database server on your pi.
+https://r00t4bl3.com/post/how-to-install-mysql-mariadb-server-on-raspberry-pi
+
+You will also need the following node installed
+node-red-node-mysql
+
+Do that by going the hamburger menu->manage palette->install
+Search for node-red-node-mysql and click install
