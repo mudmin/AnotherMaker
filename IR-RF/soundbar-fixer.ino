@@ -28,5 +28,5 @@ void loop() {
   irsend.sendRaw(irUp, sizeof(irUp) / sizeof(irUp[0]), khz);
   delay(500);
   irsend.sendRaw(irDn, sizeof(irDn) / sizeof(irDn[0]), khz);
-  delay(5000);
+  delay(1000*60*30);
 }
