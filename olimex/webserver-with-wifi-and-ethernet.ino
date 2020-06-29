@@ -7,29 +7,27 @@
 
 
 //////////////////////////////////////////////////
-// Comment this section in for WIFI
-// Load Wi-Fi library
+// // Comment this section in for WIFI
+// // Load Wi-Fi library
 // #include <WiFi.h>
-// Replace with your network credentials
+// //Replace with your network credentials
 // const char* ssid = "YOUR_SSID_HERE";
-// const char* password = "YOUR_PASSWORD HERE";
-//
+// const char* password = "YOUR_PASSWORD_HERE";
+// //
 //////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////
-// Comment this section in for ETHERNET
-// This is for the Olimex Ethernet boards. You may
-// need to change a few settings
-//Load Ethernet Library
+//// Comment this section in for ETHERNET
+//// This is for the Olimex Ethernet boards. You may
+//// need to change a few settings
+//// Load Ethernet Library
 #define ETH_CLK_MODE ETH_CLOCK_GPIO17_OUT
 #define ETH_PHY_POWER 12
 #include <ETH.h>
 static bool eth_connected = false;
 uint64_t chipid;
-
-//ESP32 Specific Ethernet
-
+//ESP32 Specific Ethernet function
 void WiFiEvent(WiFiEvent_t event)
 {
   switch (event) {
@@ -105,23 +103,23 @@ void setup() {
 
 //////////////////////////////////////////////////
 // Comment this section in for WIFI
-  // Connect to Wi-Fi network with SSID and password
-  // Serial.print("Connecting to ");
-  // Serial.println(ssid);
-  // WiFi.begin(ssid, password);
-  // while (WiFi.status() != WL_CONNECTED) {
-  //   delay(500);
-  //   Serial.print(".");
-  // }
-  //  Serial.println("");
-  //  Serial.println("Wifi connected.");
-  // Print local IP address
-  //Serial.println("IP address: ");
-  //Serial.println(WiFi.localIP());
+//   // Connect to Wi-Fi network with SSID and password
+//   Serial.print("Connecting to ");
+//   Serial.println(ssid);
+//   WiFi.begin(ssid, password);
+//   while (WiFi.status() != WL_CONNECTED) {
+//     delay(500);
+//     Serial.print(".");
+//   }
+//    Serial.println("");
+//    Serial.println("Wifi connected.");
+// //  Print local IP address
+//   Serial.println("IP address: ");
+//   Serial.println(WiFi.localIP());
 //////////////////////////////////////////////////
 
 //////////////////////////////////////////////////
-//Comment this section in for Ethernet
+////Comment this section in for Ethernet
   chipid=ESP.getEfuseMac();//The chip ID is essentially its MAC address(length: 6 bytes).
   Serial.printf("ESP32 Chip ID = %04X",(uint16_t)(chipid>>32));//print High 2 bytes
   Serial.printf("%08X\n",(uint32_t)chipid);//print Low 4bytes.
