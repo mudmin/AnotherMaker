@@ -1,0 +1,12 @@
+On the node red side, you will need to install 2 additional nodes in the pallet manager.
+
+node-red-node-serialport will allow you to read the serial data from the Arduino
+node-red-contrib-message-counter will let you count your fidgets
+
+The sensors in my arduino sketch are merely examples.  Literally any input can be used to trigger something in node red.
+
+The execute node (which is built in) lets you trigger any commands that your logged in user can trigger.
+
+I used some scripts to do the chrome and visual basic scripts, but mine are just examples to get you started.
+
+I have a bunch of libraries in this repo which may or may not be needed depending on which sensors you use.
