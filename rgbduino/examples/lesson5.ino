@@ -1,3 +1,5 @@
+//This sketch will play a little tune on the board, pause for 2 seconds (2000 milliseconds) and play it again.
+//MAKE SURE the little switch is switched to the left on the board so you can hear the sound!
 #define NTD0 -1
 #define NTD1 294
 #define NTD2 330
@@ -68,18 +70,18 @@ float durt[]=                   //根据简谱列出各节拍
   1+0.5,0.5,1+1,
 };
 int length;
-int tonepin=8;   //得用6号接口
+int tonepin=8;
 void setup()
 {
   pinMode(tonepin,OUTPUT);
-  length=sizeof(tune)/sizeof(tune[0]);   //计算长度
+  length=sizeof(tune)/sizeof(tune[0]);
 }
 void loop()
 {
   for(int x=0;x<length;x++)
   {
     tone(tonepin,tune[x]);
-    delay(200*durt[x]);   //这里用来根据节拍调节延时，500这个指数可以自己调整，在该音乐中，我发现用500比较合适。
+    delay(200*durt[x]);
     noTone(tonepin);
   }
   delay(2000);

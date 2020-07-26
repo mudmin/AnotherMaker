@@ -1,3 +1,5 @@
+//This is a very simple demo sketch that will light up all the blue LEDs on the board.
+
 void setup()
 { // put your setup code here, to run once:
 pinMode(7, OUTPUT);

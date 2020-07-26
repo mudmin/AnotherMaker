@@ -1,12 +1,14 @@
-//Make sure you install the Adafruit Neopixe library, probably from the library manager,
+//Make sure you install the Adafruit Neopixel library, probably from the library manager,
 // but it's also available in this repo
+
 
 #include <Adafruit_NeoPixel.h>
 #ifdef __AVR__
   #include <avr/power.h>
 #endif
 
-#define PIN1 6
+//in the original sketch, this was pin 6, which was wrong.
+#define PIN1 13
 #define PIN2 12
  int LED1=8;
  int LED2=9;

@@ -1,4 +1,4 @@
-
+//This sketch will fade one of the LEDS to the right of the digital pins on the board.
 int LED = 3;
 int brightness = 0;
 int fadeAmount = 5;

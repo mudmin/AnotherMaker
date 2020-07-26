@@ -1,4 +1,5 @@
-
+//This sketch will move some leds around to the right of the digital pins when you push the
+//button on the board.
 int LED = 4;
 int Button = 2;
 void setup()

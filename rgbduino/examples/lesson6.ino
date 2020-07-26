@@ -1,3 +1,6 @@
+//This example sketch will go through and dim/blink the little LED to the right of pin 6
+//on the arduino.
+
 void setup()
 {
 pinMode(6,OUTPUT);
