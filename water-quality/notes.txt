@@ -1,0 +1,12 @@
+Take as much or as little of this code as you would like.  The C02 sensor requires the CCS811 library to be copied to your arduino libraries folder.
+
+Connections.
+Obviously ground to ground and vcc to 5v.
+
+Turbidity sensor to Analog 0
+TDS sensor to Analog 1 on the arduino
+CO2 Sensor
+  SDA to A4
+  SCL to A5
+  Wake to ground
+  RST and INT not connected
