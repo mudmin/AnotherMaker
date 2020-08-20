@@ -1,0 +1,28 @@
+Download Ubuntu for Pi
+https://ubuntu.com/download/raspberry-pi
+
+Burn to 8gb+ SD card with BalenaEtcher or similar
+
+Enter this in the terminal
+sudo apt update
+sudo apt upgrade -y
+sudo apt-get install python-dev python-pip python-virtualenv
+sudo apt-get install -y build-essential libssl-dev libffi-dev
+
+sudo apt install nano
+sudo apt install ftp
+virtualenv env/
+pip install --upgrade 'setuptools<45.0.0'
+pip install rdpy
+ . env/bin/activate
+pip install opencanary
+
+opencanaryd --copyconfig
+sudo nano /root/.opencanary.conf (orange pi)
+sudo nano /home/ubuntu/.opencanary.conf (raspberry pi)
+
+
+See this guide to setup email
+https://opencanary.readthedocs.io/en/latest/alerts/email.html
+
+opencanaryd --start
