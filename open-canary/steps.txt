@@ -1,3 +1,11 @@
+PLEASE NOTE:
+I believe this WILL work on an original Pi or the Pi Zero, but it will need some tweaking. 
+The install process is ridiculously slow on these devices and I'm not going to spend any more
+time trying to figure it out.  You will need to use Raspberry Pi OS (formerly Rasbian) due to
+the Arm Cortex v6 Processor as opposed to the v7 in the later Pi's.  Please comment on the video
+https://www.youtube.com/watch?v=RanpEQBvAY0 to let us know how you got it to work.
+
+
 Download Ubuntu for Pi
 https://ubuntu.com/download/raspberry-pi
 
