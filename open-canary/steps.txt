@@ -1,11 +1,6 @@
-PLEASE NOTE:
-I believe this WILL work on an original Pi or the Pi Zero, but it will need some tweaking. 
-The install process is ridiculously slow on these devices and I'm not going to spend any more
-time trying to figure it out.  You will need to use Raspberry Pi OS (formerly Rasbian) due to
-the Arm Cortex v6 Processor as opposed to the v7 in the later Pi's.  Please comment on the video
-https://www.youtube.com/watch?v=RanpEQBvAY0 to let us know how you got it to work.
+INSTRUCTIONS (See notes below for additional info)
 
-
+####################################################
 Download Ubuntu for Pi
 https://ubuntu.com/download/raspberry-pi
 
@@ -34,3 +29,35 @@ See this guide to setup email
 https://opencanary.readthedocs.io/en/latest/alerts/email.html
 
 opencanaryd --start
+
+####################################################
+
+PLEASE NOTE:
+I believe this WILL work on an original Pi or the Pi Zero, but it will need some tweaking.
+The install process is ridiculously slow on these devices and I'm not going to spend any more
+time trying to figure it out.  You will need to use Raspberry Pi OS (formerly Rasbian) due to
+the Arm Cortex v6 Processor as opposed to the v7 in the later Pi's.  Please comment on the video
+https://www.youtube.com/watch?v=RanpEQBvAY0 to let us know how you got it to work.
+
+Note #2:  For running automatically on boot. Courtesy of Matthew Bowels in the YT comments
+sudo -i (this will run all commands as root, you NEED to do everything as root)
+run the install instructions (as root) all the way up to the --copyconfig
+make a script to run it (nano /usr/loca/bin/opencanary.sh)
+Script should be
+             #!/bin/bash
+             ./usr/local/bin/opencanary.sh
+             (exit the editor while saving)
+Make script executable (chmod x+ /usr/local/bin/opencanary.sh)
+test script ( ./usr/local/bin/opencanary.sh)
+it should be running now if not stop and troubleshoot that
+Make it run on boot with crontab -e
+@reboot /usr/loca/bin/opencanary.sh (save and exit)
+Reboot and it should be running.
+
+NOW I am sure that running this as root is not ideal but i could not get it to work any other way for me
+and since the device is intended to be probed by hackers nothing should be running on this so i don't think
+its a HUGE deal but if someone else could make this work as a normal user then i would do that.
+
+Note #3: Courtesy of mannydr3 on github
+I had to install testresources then launchpadlib before getting it to work:
+pip3 install testresources && pip3 install launchpadlib
