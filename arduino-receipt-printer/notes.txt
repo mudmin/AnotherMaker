@@ -1,0 +1,112 @@
+Commands:
+
+27 64               - init
+27 105              - cut
+27 97 xxx           - justification
+27 77 xxx           - font
+29 66 xxx           - color
+27 71 xxx           - bold
+29 33 xxx           - size
+27 100 xxx          - feed
+29 40 75 2 0 50 xxx - speed
+
+Command Notes: http://download.delfi.com/SupportDL/Epson/Manuals/TM-T88IV/Programming%20manual%20APG_1005_receipt.pdf
+
+
+Starter Code
+//https://www.youtube.com/watch?v=yNPC8QJPuZ4&feature=youtu.be
+void setup()
+{
+Serial.begin(9600);
+
+delay(1000);
+int delTime=0; // delay between each instruction
+begin(); //reset all settings
+justification(0); //left side
+Serial.println("Arduino");
+delay(delTime);
+justification(1); //middle
+size(2); //big text
+Serial.println("TEST V 0.2");
+delay(delTime);
+size(0); //small text
+justification(0); //left side
+color(1); //white text
+Serial.println(" White text ");
+delay(delTime);
+color(0); //black text
+Serial.println("Hello world!!!!!");
+delay(delTime);
+feed(1); //print 1 line below
+Serial.println("Thermal Printer TEST");
+delay(delTime);
+feed(1); //print 1 line below
+justification(1);
+Serial.println("SIMPLE THERMAL PRINTER");
+delay(delTime);
+feed(1); //print 1 line below
+Serial.println("CONNECTED TO ARDUINO");
+delay(delTime);
+feed(1); //print 1 line below
+Serial.println("very very very long text in this line......");
+delay(delTime);
+feed(1); //print 1 line below
+Serial.println("very very very long text in this line again");
+delay(delTime);
+feed(1); //print 1 line below
+Serial.println("Printing complete!");
+cut(); //cut the paper
+}
+
+void loop()
+{
+
+
+}
+
+void begin()
+{
+Serial.write(27);
+Serial.write(64);
+Serial.write(10);
+}
+
+void justification(int just)
+{
+Serial.write(27);
+Serial.write(97);
+Serial.write(just);
+Serial.write(10);
+}
+
+void feed(int lines)
+{
+Serial.write(27);
+Serial.write(100);
+Serial.write(lines);
+Serial.write(10);
+}
+
+void cut()
+{
+feed(3);
+Serial.write(27);
+Serial.write(105);
+Serial.write(10);
+}
+
+void color(bool col)
+{
+Serial.write(29);
+Serial.write(66);
+Serial.write(col);
+Serial.write(10);
+}
+
+void size(int siz)
+{
+Serial.write(29);
+Serial.write(33);
+Serial.write(siz);
+Serial.write(10);
+}

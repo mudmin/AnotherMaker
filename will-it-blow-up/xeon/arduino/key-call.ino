@@ -2,22 +2,15 @@
 #include <SPI.h>
 #include <ArduinoJson.h> //v6.11.5 from Library Manager
 
-// //Node-Red API Relay
 const int port = 80;
-const char* server = "192.168.95.9";
-const char* api = "GET /api/key/?key=12345-67890-12345-67890-12345 HTTP/1.0";
-
-
-// // PHP API Relay
-// //note the 4414 is there because my php file is in c:\xampp\htdocs\4414
-// const int port = 80;
-// const char* server = "192.168.95.148";
-// const char* api = "GET /4414/apirelay.php HTTP/1.0";
+const char* server = "192.168.95.199";
+const char* api = "GET /wibu/key/?key=12345-67890-12345-67890-12345 HTTP/1.0";
 
 EthernetClient client;
 void setup() {
   // Initialize Serial port
   Serial.begin(9600);
+  Serial.println("Beginning boot process");
   while (!Serial) continue;
 
   // Initialize Ethernet library
@@ -34,6 +27,7 @@ void setup() {
 void loop() {
   apiCall();
   // delay(10000);
+  // no delay means the arduino hits the API as fast as it possibly can
 }
 
 void apiCall(){
