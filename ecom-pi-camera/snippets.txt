@@ -1,0 +1,22 @@
+These are snippets and bash scripts to fire off different functions from the command line
+
+gst-launch-1.0 v4l2src device=/dev/video0  ! video/x-raw ,width=4192, height=3120 ! videoconvert ! fpsdisplaysink video-sink=autovideosink text-overlay=false sync=false -v
+
+cho "Streaming  640x480 ......"
+gst-launch-1.0 v4l2src device=/dev/video0  ! video/x-raw ,width=640, height=480 ! videoconvert ! fpsdisplaysink video-sink=autovideosink text-overlay=false sync=false
+sleep 15s
+pkill gst-launch-1.0
+echo "Streaming 640x480 completed ...!"
+
+
+echo "Streaming  4192x3120 ....."
+gst-launch-1.0 v4l2src device=/dev/video0  ! video/x-raw ,width=4192, height=3120 ! videoconvert ! fpsdisplaysink video-sink=autovideosink text-overlay=false sync=false
+sleep 7s
+pkill gst-launch-1.0
+echo "Streaming 4192x3120 completed ...!"
+
+gst-launch-1.0 v4l2src num-buffers=1 ! jpegenc ! filesink location=/home/pi/test.jpg
+
+gst-launch-1.0 v4l2src num-buffers=1 ! video/x-raw ,width=4192, height=3120 ! jpegenc ! filesink location=/home/pi/test.jpg
+
+gst-launch-1.0 v4l2src device=/dev/video0  ! video/x-raw ,width=4192, height=3120 ! videoconvert ! fpsdisplaysink video-sink=autovideosink text-overlay=false sync=false
