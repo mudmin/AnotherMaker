@@ -2,6 +2,10 @@
 //AnotherMaker.com
 //Youtube.com/AnotherMaker
 
+//The loop is just an example. Do whatever you think
+//is fun.  Use it as an experiment to play with randomness
+//and maybe convert it to a switch statement.
+
 //You will need the IR Remote Library from the Arduino IDE
 #include <IRremote.h>
 int rn = 0;

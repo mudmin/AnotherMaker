@@ -2,6 +2,10 @@
 //AnotherMaker.com
 //Youtube.com/AnotherMaker
 
+//The loop is just an example. Do whatever you think
+//is fun.  Use it as an experiment to play with randomness
+//and maybe convert it to a switch statement.
+
 //You will need the IRremoteESP8266 Library from the Arduino IDE
 #include <Arduino.h>
 #include <IRremoteESP8266.h>
