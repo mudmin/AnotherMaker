@@ -1,0 +1,7 @@
+upvol 20DF40BF
+downvol 20DFC03F
+power 20DF10EF
+chup 0x20DF00FF
+chdown 0xFFFFFFFF
+mute 0x20DF906F
+input 0x20DFF40B
