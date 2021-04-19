@@ -1,0 +1,15 @@
+USA Links
+Gotek Floppy Emulator - https://amzn.to/3v3aRfE
+IDE to SD Adapter - https://amzn.to/3tzJn0z
+5.25 to 3.5 Adapter - https://amzn.to/3du3jwu
+Molex Y Adapters - https://amzn.to/2QFgQZa
+OLED Screen - https://amzn.to/3n2nPHE
+Rotary Encoders - https://amzn.to/3n51Y2q
+
+Note that FlashFloppy is only NEEDED if you want the OLED and Rotary Encoder
+A lot of people love it though. I think it's okay.
+
+FlashFloppy - https://github.com/keirf/FlashFloppy
+USB A to A Cable - Program FlashFloppy solder free - https://amzn.to/3duVzdq
+Rotary Encoder and OLED Mod - http://projectspeccy.com/2017/11/03/gotekdvirtual-spectrum-floppy-disk/
+FlashFloppy A to A Method - Worked WAY easier on Win7 for me - https://www.youtube.com/watch?v=yUOyZB9cro4

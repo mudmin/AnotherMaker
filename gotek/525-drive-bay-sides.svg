@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   height="88.802612mm"
+   viewBox="0 0 176.6718 88.802614"
+   width="176.6718mm"
+   version="1.1"
+   id="svg881"
+   sodipodi:docname="525-drive-bay-sides.svg"
+   inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)">
+  <defs
+     id="defs885" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1920"
+     inkscape:window-height="1057"
+     id="namedview883"
+     showgrid="false"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     inkscape:zoom="0.56079325"
+     inkscape:cx="55.452495"
+     inkscape:cy="-56.494057"
+     inkscape:window-x="1929"
+     inkscape:window-y="1078"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg881" />
+  <!--
+OpenBox - Box with top and front open
+
+Created with Boxes.py (https://festi.info/boxes.py)
+Creation date: 2021-04-04 13:55:02
+Command line (remove spaces between dashes): boxes OpenBox - -FingerJoint_angle=90.0 - -FingerJoint_style=rectangular - -FingerJoint_surroundingspaces=2.0 - -FingerJoint_edge_width=1.0 - -FingerJoint_finger=5.0 - -FingerJoint_play=0.0 - -FingerJoint_space=2.0 - -FingerJoint_width=1.0 - -x=146.1 - -y=175 - -h=41.3 - -outside=0 - -outside=1 - -thickness=3.0 - -format=svg - -tabs=0.0 - -debug=0 - -reference=100 - -burn=0.1
+Url: http://festi.info/OpenBox?FingerJoint_angle=90.0&FingerJoint_style=rectangular&FingerJoint_surroundingspaces=2.0&FingerJoint_edge_width=1.0&FingerJoint_finger=5.0&FingerJoint_play=0.0&FingerJoint_space=2.0&FingerJoint_width=1.0&x=146.1&y=175&h=41.3&outside=0&outside=1&thickness=3.0&format=svg&tabs=0.0&debug=0&reference=100&burn=0.1&render=1
+SettingsUrl: http://festi.info/OpenBox?FingerJoint_angle=90.0&FingerJoint_style=rectangular&FingerJoint_surroundingspaces=2.0&FingerJoint_edge_width=1.0&FingerJoint_finger=5.0&FingerJoint_play=0.0&FingerJoint_space=2.0&FingerJoint_width=1.0&x=146.1&y=175&h=41.3&outside=0&outside=1&thickness=3.0&format=svg&tabs=0.0&debug=0&reference=100&burn=0.1
+-->
+  <title
+     id="title860">OpenBox</title>
+  <metadata
+     id="metadata862">
+    <rdf:RDF>
+      <cc:Work>
+        <dc:title>OpenBox</dc:title>
+        <dc:date>2021-04-04 13:55:02</dc:date>
+        <dc:source>http://festi.info/OpenBox?FingerJoint_angle=90.0&amp;FingerJoint_style=rectangular&amp;FingerJoint_surroundingspaces=2.0&amp;FingerJoint_edge_width=1.0&amp;FingerJoint_finger=5.0&amp;FingerJoint_play=0.0&amp;FingerJoint_space=2.0&amp;FingerJoint_width=1.0&amp;x=146.1&amp;y=175&amp;h=41.3&amp;outside=0&amp;outside=1&amp;thickness=3.0&amp;format=svg&amp;tabs=0.0&amp;debug=0&amp;reference=100&amp;burn=0.1&amp;render=1</dc:source>
+        <dc:description>Box with top and front open
+
+Created with Boxes.py (https://festi.info/boxes.py)
+Command line: boxes OpenBox --FingerJoint_angle=90.0 --FingerJoint_style=rectangular --FingerJoint_surroundingspaces=2.0 --FingerJoint_edge_width=1.0 --FingerJoint_finger=5.0 --FingerJoint_play=0.0 --FingerJoint_space=2.0 --FingerJoint_width=1.0 --x=146.1 --y=175 --h=41.3 --outside=0 --outside=1 --thickness=3.0 --format=svg --tabs=0.0 --debug=0 --reference=100 --burn=0.1
+Url: http://festi.info/OpenBox?FingerJoint_angle=90.0&amp;FingerJoint_style=rectangular&amp;FingerJoint_surroundingspaces=2.0&amp;FingerJoint_edge_width=1.0&amp;FingerJoint_finger=5.0&amp;FingerJoint_play=0.0&amp;FingerJoint_space=2.0&amp;FingerJoint_width=1.0&amp;x=146.1&amp;y=175&amp;h=41.3&amp;outside=0&amp;outside=1&amp;thickness=3.0&amp;format=svg&amp;tabs=0.0&amp;debug=0&amp;reference=100&amp;burn=0.1&amp;render=1
+SettingsUrl: http://festi.info/OpenBox?FingerJoint_angle=90.0&amp;FingerJoint_style=rectangular&amp;FingerJoint_surroundingspaces=2.0&amp;FingerJoint_edge_width=1.0&amp;FingerJoint_finger=5.0&amp;FingerJoint_play=0.0&amp;FingerJoint_space=2.0&amp;FingerJoint_width=1.0&amp;x=146.1&amp;y=175&amp;h=41.3&amp;outside=0&amp;outside=1&amp;thickness=3.0&amp;format=svg&amp;tabs=0.0&amp;debug=0&amp;reference=100&amp;burn=0.1
+</dc:description>
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     id="p-2"
+     style="fill:none;fill-opacity:1;stroke:#ff0000;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+     transform="translate(-156.8282,-139.89739)">
+    <path
+       d="m 160.9,228.2 h 15.5 c 0.055,0 0.1,-0.045 0.1,-0.1 v -2.9 c 0,-0.1 -0.1,0 0,0 h 14.8 c 0.1,0 0,-0.1 0,0 v 2.9 c 0,0.055 0.045,0.1 0.1,0.1 h 6 c 0.055,0 0.1,-0.045 0.1,-0.1 v -2.9 c 0,-0.1 -0.1,0 0,0 h 14.8 c 0.1,0 0,-0.1 0,0 v 2.9 c 0,0.055 0.045,0.1 0.1,0.1 h 6 c 0.055,0 0.1,-0.045 0.1,-0.1 v -2.9 c 0,-0.1 -0.1,0 0,0 h 14.8 c 0.1,0 0,-0.1 0,0 v 2.9 c 0,0.055 0.045,0.1 0.1,0.1 h 6 c 0.055,0 0.1,-0.045 0.1,-0.1 v -2.9 c 0,-0.1 -0.1,0 0,0 h 14.8 c 0.1,0 0,-0.1 0,0 v 2.9 c 0,0.055 0.045,0.1 0.1,0.1 h 6 c 0.055,0 0.1,-0.045 0.1,-0.1 v -2.9 c 0,-0.1 -0.1,0 0,0 h 14.8 c 0.1,0 0,-0.1 0,0 v 2.9 c 0,0.055 0.045,0.1 0.1,0.1 h 6 c 0.055,0 0.1,-0.045 0.1,-0.1 v -2.9 c 0,-0.1 -0.1,0 0,0 h 14.8 c 0.1,0 0,-0.1 0,0 v 2.9 c 0,0.055 0.045,0.1 0.1,0.1 h 6 c 0.055,0 0.1,-0.045 0.1,-0.1 v -2.9 c 0,-0.1 -0.1,0 0,0 h 14.8 c 0.1,0 0,-0.1 0,0 v 2.9 c 0,0.055 0.045,0.1 0.1,0.1 h 15.5 c 0.055,0 0.1,-0.045 0.1,-0.1 v -3 -38.3 c 0,-0.055 -0.045,-0.1 -0.1,-0.1 h -172 c -0.055,0 -0.1,0.045 -0.1,0.1 v 11.55 c 0,0.1 0.1,0 0,0 h -2.9 c -0.055,0 -0.1,0.045 -0.1,0.1 v 15 c 0,0.055 0.045,0.1 0.1,0.1 h 2.9 c 0.1,0 0,-0.1 0,0 v 11.55 3 c 0,0.055 0.045,0.1 0.1,0.1 z"
+       stroke="rgb(0,0,0)"
+       stroke-width="0.20"
+       id="path872"
+       style="fill:none;fill-opacity:1;stroke:#ff0000;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+  </g>
+  <g
+     id="p-3"
+     style="fill:none;fill-opacity:1;stroke:#ff0000;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+     transform="translate(-157.3,-143.2)">
+    <path
+       d="m 160.9,185.2 h 15.5 c 0.055,0 0.1,-0.045 0.1,-0.1 v -2.9 c 0,-0.1 -0.1,0 0,0 h 14.8 c 0.1,0 0,-0.1 0,0 v 2.9 c 0,0.055 0.045,0.1 0.1,0.1 h 6 c 0.055,0 0.1,-0.045 0.1,-0.1 v -2.9 c 0,-0.1 -0.1,0 0,0 h 14.8 c 0.1,0 0,-0.1 0,0 v 2.9 c 0,0.055 0.045,0.1 0.1,0.1 h 6 c 0.055,0 0.1,-0.045 0.1,-0.1 v -2.9 c 0,-0.1 -0.1,0 0,0 h 14.8 c 0.1,0 0,-0.1 0,0 v 2.9 c 0,0.055 0.045,0.1 0.1,0.1 h 6 c 0.055,0 0.1,-0.045 0.1,-0.1 v -2.9 c 0,-0.1 -0.1,0 0,0 h 14.8 c 0.1,0 0,-0.1 0,0 v 2.9 c 0,0.055 0.045,0.1 0.1,0.1 h 6 c 0.055,0 0.1,-0.045 0.1,-0.1 v -2.9 c 0,-0.1 -0.1,0 0,0 h 14.8 c 0.1,0 0,-0.1 0,0 v 2.9 c 0,0.055 0.045,0.1 0.1,0.1 h 6 c 0.055,0 0.1,-0.045 0.1,-0.1 v -2.9 c 0,-0.1 -0.1,0 0,0 h 14.8 c 0.1,0 0,-0.1 0,0 v 2.9 c 0,0.055 0.045,0.1 0.1,0.1 h 6 c 0.055,0 0.1,-0.045 0.1,-0.1 v -2.9 c 0,-0.1 -0.1,0 0,0 h 14.8 c 0.1,0 0,-0.1 0,0 v 2.9 c 0,0.055 0.045,0.1 0.1,0.1 h 15.5 c 0.055,0 0.1,-0.045 0.1,-0.1 v -3 -38.3 c 0,-0.055 -0.045,-0.1 -0.1,-0.1 h -172 c -0.055,0 -0.1,0.045 -0.1,0.1 v 11.55 c 0,0.1 0.1,0 0,0 h -2.9 c -0.055,0 -0.1,0.045 -0.1,0.1 v 15 c 0,0.055 0.045,0.1 0.1,0.1 h 2.9 c 0.1,0 0,-0.1 0,0 v 11.55 3 c 0,0.055 0.045,0.1 0.1,0.1 z"
+       stroke="rgb(0,0,0)"
+       stroke-width="0.20"
+       id="path875"
+       style="fill:none;fill-opacity:1;stroke:#ff0000;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+  </g>
+</svg>
