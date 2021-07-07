@@ -1,0 +1,31 @@
+If you use my laser files, I wired each button to these pins of the Mega
+20  Plunge Toilet
+21  Ejector Seat
+22  Launch Rocket
+23  Turbo Boost
+24  Zombie Defense
+25  Emergency Alarm
+26  Stealth Mode
+27  Jam Radar
+28  Reverse Thrusters
+29  Order Food
+30  Try Harder
+31  Party Mode
+32  Secret Button
+33  Deploy Airbags
+34  Retro Rocket
+35  Don't Touch
+36  2020 Mode
+37  Activate Ninjas
+38  Shoot First
+39  Ask Questions
+40  Go Bowling
+41  Feed Cat
+42  Artificial Intelligence
+43  Real Intelligence
+44  Don't Panic
+45  Panic
+46  Grenade Launcher
+47  Serious Mode
+48  Level Up
+49  System Check
