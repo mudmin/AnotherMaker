@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightBurnProject AppVersion="0.9.20" FormatVersion="0" MaterialHeight="0" MirrorX="True" MirrorY="True">
+    <Thumbnail Source="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"/>
+    <VariableText>
+        <Start Value="0"/>
+        <End Value="999"/>
+        <Current Value="0"/>
+        <Increment Value="1"/>
+        <AutoAdvance Value="0"/>
+    </VariableText>
+    <UIPrefs>
+        <Optimize_ByLayer Value="0"/>
+        <Optimize_ByGroup Value="-1"/>
+        <Optimize_ByPriority Value="1"/>
+        <Optimize_WhichDirection Value="0"/>
+        <Optimize_InnerToOuter Value="1"/>
+        <Optimize_ByDirection Value="0"/>
+        <Optimize_ReduceTravel Value="1"/>
+        <Optimize_HideBacklash Value="0"/>
+        <Optimize_ReduceDirChanges Value="0"/>
+        <Optimize_ChooseCorners Value="0"/>
+        <Optimize_AllowReverse Value="1"/>
+        <Optimize_RemoveOverlaps Value="0"/>
+        <Optimize_OptimalEntryPoint Value="1"/>
+    </UIPrefs>
+    <CutSetting type="Cut">
+        <index Value="2"/>
+        <name Value="C02"/>
+        <minPower Value="75"/>
+        <maxPower Value="75"/>
+        <minPower2 Value="20"/>
+        <maxPower2 Value="20"/>
+        <speed Value="30"/>
+        <kerf Value="0"/>
+        <zOffset Value="0"/>
+        <enableLaser1 Value="1"/>
+        <enableLaser2 Value="0"/>
+        <startDelay Value="0"/>
+        <endDelay Value="0"/>
+        <throughPower Value="0"/>
+        <throughPower2 Value="0"/>
+        <enableCutThroughStart Value="0"/>
+        <enableCutThroughEnd Value="0"/>
+        <priority Value="0"/>
+        <frequency Value="20000"/>
+        <overrideFrequency Value="0"/>
+        <PPI Value="200"/>
+        <enablePPI Value="0"/>
+        <doOutput Value="1"/>
+        <hide Value="0"/>
+        <runBlower Value="1"/>
+        <autoBlower Value="0"/>
+        <blowerSpeedOverride Value="0"/>
+        <blowerSpeedPercent Value="100"/>
+        <overcut Value="0"/>
+        <rampLength Value="0"/>
+        <rampOuter Value="0"/>
+        <numPasses Value="1"/>
+        <zPerPass Value="0"/>
+        <perforate Value="0"/>
+        <perfLen Value="0.1"/>
+        <perfSkip Value="0.1"/>
+        <dotMode Value="0"/>
+        <dotTime Value="1"/>
+        <dotSpacing Value="0.01"/>
+        <tabsEnabled Value="0"/>
+        <manualTabs Value="1"/>
+        <tabSize Value="0.5"/>
+        <tabCount Value="1"/>
+        <tabSpacing Value="50"/>
+        <skipInnerTabs Value="0"/>
+        <tabsUseSpacing Value="1"/>
+        <tabCutPower Value="0"/>
+        <scanOpt Value="mergeAll"/>
+        <bidir Value="1"/>
+        <crossHatch Value="0"/>
+        <overscan Value="0"/>
+        <overscanPercent Value="2.5"/>
+        <floodFill Value="0"/>
+        <interval Value="0.1"/>
+        <angle Value="0"/>
+        <cellsPerInch Value="50"/>
+        <halftoneAngle Value="22.5"/>
+    </CutSetting>
+    <Shape Type="Path" CutIndex="2">
+        <XForm>-24.9807 0 0 -25.4 824.394 618.6</XForm>
+        <V vx="0.3125" vy="1" c0x="0.31250006" c0y="0.79289317"/>
+        <V vx="0.6875" vy="0.625" c1x="0.48039329" c1y="0.625"/>
+        <V vx="10.3125" vy="0.625" c0x="10.519607" c0y="0.625"/>
+        <V vx="10.6875" vy="1" c1x="10.6875" c1y="0.79289317"/>
+        <V vx="10.6875" vy="7" c0x="10.6875" c0y="7.2071066"/>
+        <V vx="10.3125" vy="7.375" c1x="10.519607" c1y="7.375"/>
+        <V vx="0.6875" vy="7.375" c0x="0.48039317" c0y="7.375"/>
+        <V vx="0.3125" vy="7" c1x="0.3125" c1y="7.2071066"/>
+        <P T="B" p0="0" p1="1"/>
+        <P T="L" p0="1" p1="2"/>
+        <P T="B" p0="2" p1="3"/>
+        <P T="L" p0="3" p1="4"/>
+        <P T="B" p0="4" p1="5"/>
+        <P T="L" p0="5" p1="6"/>
+        <P T="B" p0="6" p1="7"/>
+        <P T="L" p0="7" p1="0"/>
+    </Shape>
+    <Shape Type="Ellipse" CutIndex="2" Rx="6.1999998" Ry="6.1999874">
+        <XForm>1 0 0 1 739.724 621</XForm>
+    </Shape>
+    <Shape Type="Ellipse" CutIndex="2" Rx="6.1999998" Ry="6.1999874">
+        <XForm>1 0 0 1 704.924 621</XForm>
+    </Shape>
+    <Shape Type="Ellipse" CutIndex="2" Rx="6.1999998" Ry="6.1999874">
+        <XForm>1 0 0 1 670.124 621</XForm>
+    </Shape>
+    <Shape Type="Ellipse" CutIndex="2" Rx="6.1999998" Ry="6.1999874">
+        <XForm>1 0 0 1 635.324 621</XForm>
+    </Shape>
+    <Notes ShowOnLoad="0" Notes=""/>
+</LightBurnProject>
