@@ -24,7 +24,7 @@ void loop(){
     }
 
     //read it back and make sure you're getting the right value
-    for (int i = 0; i < 255; i++){
+    for (int i = 0; i < 2; i++){
       read = EEPROM.read(i); //address
       if(read != step){
         Serial.println("FAIIIIIIIIIIIIIIIIIIIIIL");
