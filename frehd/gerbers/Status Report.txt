@@ -1,0 +1,32 @@
+CAM Outputs Generation Report
+for 'CAM Outputs for wd1010_rel1.cam'
+at 10:46:37 on 20-Apr-2013
+
+
+'NC Drill Output 1'
+'wd1010_rel1.TXT' generated
+'wd1010_rel1.DRL' generated
+'wd1010_rel1.DRR' generated
+
+'DRC Output 1'
+'wd1010_rel1.drc' generated
+
+'Bom'
+'BOM for wd1010_rel1.bom' generated
+'BOM for wd1010_rel1.txt' generated
+
+'Gerber Output 1'
+'wd1010_rel1.GTL' generated
+'wd1010_rel1.GBL' generated
+'wd1010_rel1.GTO' generated
+'wd1010_rel1.GTP' generated
+'wd1010_rel1.GBP' generated
+'wd1010_rel1.GTS' generated
+'wd1010_rel1.GBS' generated
+'wd1010_rel1.GKO' generated
+'wd1010_rel1.GPT' generated
+'wd1010_rel1.GPB' generated
+'wd1010_rel1.REP' generated
+
+
+Total number of generated files = 17

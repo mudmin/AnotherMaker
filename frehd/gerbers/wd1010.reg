@@ -1,0 +1,58 @@
+[Directory]
+Status Report.txt=Text
+wd1010_rel1.DRR=Text
+wd1010_rel1.TXT=Text
+wd1010_rel1.DRL=Unknown
+wd1010_rel1.drc=Text
+BOM for wd1010_rel1.bom=Spread
+BOM for wd1010_rel1.txt=Text
+wd1010_rel1.REP=Text
+wd1010_rel1.GTL=Text
+wd1010_rel1.GBL=Text
+wd1010_rel1.GTO=Text
+wd1010_rel1.GTP=Text
+wd1010_rel1.GBP=Text
+wd1010_rel1.GTS=Text
+wd1010_rel1.GBS=Text
+wd1010_rel1.GKO=Text
+wd1010_rel1.GPT=Text
+wd1010_rel1.GPB=Text
+wd1010_rel1.apr=Text
+[Status Report.txt]
+Editor Kind=Text
+[wd1010_rel1.DRR]
+Editor Kind=Text
+[wd1010_rel1.TXT]
+Editor Kind=Text
+[wd1010_rel1.DRL]
+Editor Kind=Unknown
+[wd1010_rel1.drc]
+Editor Kind=Text
+[BOM for wd1010_rel1.bom]
+Editor Kind=Spread
+[BOM for wd1010_rel1.txt]
+Editor Kind=Text
+[wd1010_rel1.REP]
+Editor Kind=Text
+[wd1010_rel1.GTL]
+Editor Kind=Text
+[wd1010_rel1.GBL]
+Editor Kind=Text
+[wd1010_rel1.GTO]
+Editor Kind=Text
+[wd1010_rel1.GTP]
+Editor Kind=Text
+[wd1010_rel1.GBP]
+Editor Kind=Text
+[wd1010_rel1.GTS]
+Editor Kind=Text
+[wd1010_rel1.GBS]
+Editor Kind=Text
+[wd1010_rel1.GKO]
+Editor Kind=Text
+[wd1010_rel1.GPT]
+Editor Kind=Text
+[wd1010_rel1.GPB]
+Editor Kind=Text
+[wd1010_rel1.apr]
+Editor Kind=Text

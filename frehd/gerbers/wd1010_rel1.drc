@@ -1,0 +1,127 @@
+Protel Design System Design Rule Check
+PCB File : wd1010_rel1.pcb
+Date     : 20-Apr-2013
+Time     : 10:46:39
+
+Processing Rule : Minimum Annular Ring (Minimum=8mil) (On the board )
+Rule Violations :0
+
+Processing Rule : Width Constraint (Min=8mil) (Max=100mil) (Prefered=16mil) (Is on net VCC )
+Rule Violations :0
+
+Processing Rule : Width Constraint (Min=8mil) (Max=100mil) (Prefered=16mil) (Is on net GND )
+Rule Violations :0
+
+Processing Rule : Hole Size Constraint (Min=1mil) (Max=300mil) (On the board )
+Rule Violations :0
+
+Processing Rule : Pads and Vias to follow the Drill pairs settings
+Rule Violations :0
+
+Processing Rule : Testpoint Style (Under Component=Yes) (On the board )
+Rule Violations :0
+
+Processing Rule : Testpoint Usage (Valid =Required, Allow multiple per net=No) (On the board )
+   Violation         Net TX  
+   Violation         Net RX  
+   Violation         Net RTS  
+   Violation         Net CTS  
+   Violation         Net NetU5_2  
+   Violation         Net NetC6_2  
+   Violation         Net NetC9_1  
+   Violation         Net NetC12_1  
+   Violation         Net NetC9_2  
+   Violation         Net NetC12_2  
+   Violation         Net OTX  
+   Violation         Net ORX  
+   Violation         Net OCTS  
+   Violation         Net ORTS  
+   Violation         Net WR_N  
+   Violation         Net VCC  
+   Violation         Net SD_WRPROT  
+   Violation         Net GND  
+   Violation         Net SD_CD  
+   Violation         Net D7  
+   Violation         Net D6  
+   Violation         Net D5  
+   Violation         Net D4  
+   Violation         Net D3  
+   Violation         Net D2  
+   Violation         Net D1  
+   Violation         Net D0  
+   Violation         Net RTC  
+   Violation         Net SCL  
+   Violation         Net SDA  
+   Violation         Net NetR12_1  
+   Violation         Net NetR4_1  
+   Violation         Net 3V3  
+   Violation         Net SPI_SDI_3V3  
+   Violation         Net STAT_OE_N  
+   Violation         Net STAT_CS  
+   Violation         Net SPI_CLK  
+   Violation         Net SPI_SDO  
+   Violation         Net SD_CLK_3V3  
+   Violation         Net SD_IN_3V3  
+   Violation         Net SD_CS_3V3  
+   Violation         Net NetBAT1_2  
+   Violation         Net NetY2_2  
+   Violation         Net NetY2_1  
+   Violation         Net SD_CS_5V  
+   Violation         Net BUS_WAIT_N  
+   Violation         Net EXTIOSEL_N  
+   Violation         Net PIC_SEL_N  
+   Violation         Net PIC_WAIT_N  
+   Violation         Net RD_N  
+   Violation         Net A7  
+   Violation         Net A6  
+   Violation         Net A5  
+   Violation         Net A4  
+   Violation         Net A3  
+   Violation         Net A2  
+   Violation         Net A1  
+   Violation         Net A0  
+   Violation         Net LED0  
+   Violation         Net LED1  
+   Violation         Net IORQ_N  
+   Violation         Net RESET_N  
+   Violation         Net MCLR  
+   Violation         Net NetR13_1  
+   Violation         Net NetR14_1  
+   Violation         Net OSC2  
+   Violation         Net OSC1  
+   Violation         Net M1_N  
+   Violation         Net BUS_INT_N  
+   Violation         Net SPARE2  
+   Violation         Net SPARE1  
+   Violation         Net DD7  
+   Violation         Net DD6  
+   Violation         Net DD5  
+   Violation         Net DD4  
+   Violation         Net DD3  
+   Violation         Net DD2  
+   Violation         Net DD1  
+   Violation         Net DD0  
+   Violation         Net SPI_SDI  
+Rule Violations :80
+
+Processing Rule : Width Constraint (Min=8mil) (Max=100mil) (Prefered=12mil) (On the board )
+Rule Violations :0
+
+Processing Rule : Clearance Constraint (Gap=9mil) (On the board ),(On the board )
+Rule Violations :0
+
+Processing Rule : Broken-Net Constraint ( (On the board ) )
+Rule Violations :0
+
+Processing Rule : Short-Circuit Constraint (Allowed=Not Allowed) (On the board ),(On the board )
+Rule Violations :0
+
+Processing Rule : Component Clearance Constraint (Gap=10mil) (On the board ),(On the board )
+Rule Violations :0
+
+Processing Rule : Component Clearance Constraint (Gap=10mil) (Disabled)(On the board ),(On the board )
+Rule Violations :0
+
+
+Violations Detected : 80
+Time Elapsed        : 00:00:01
