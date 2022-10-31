@@ -9,7 +9,7 @@ On 20-Apr-2013 at 10:46:42
 
  10MHz               RAD0.2           1    Y1
 
- 10k                 AXI-0.4          5    R2, R4, R5, R12, R15
+ 10k                 AXI-0.4          5    R2, R4, R5, R12, R15 (Do not install R15)
 
  10u                 RB.1             2    C5, C12
 
@@ -33,7 +33,7 @@ On 20-Apr-2013 at 10:46:42
 
  74HCT245            DIP20F           1    U3
 
- BS170               TO92-BS170       1    Q1
+ BS170 (DO NOT USE)  TO92-BS170       1    Q1
 
  CON2                SIP2             1    J4
 
@@ -56,4 +56,3 @@ On 20-Apr-2013 at 10:46:42
  PIC18F4620          DIP40F           1    U1
 
  SDCARD              SDCARD1          1    J2
-
