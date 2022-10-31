@@ -1,0 +1,83 @@
+; VHDUTL - Utility for the Vecoven Hard Drive Emulator
+; CP/M 2.2 Version
+
+; Assembler Control Flags
+
+CPM         EQU     1
+TRSDOS      EQU     0
+
+BDOS        EQU     0005h       ;bdos entry point
+PARM        EQU     0080h       ;parameters
+WCHAR       EQU     2           ;write character function
+
+VHDUTL      ORG     0100H
+            PUSH    HL          ; Start POP's this after the interface check
+                                ; Needed for compatibility with TRS version
+            JP      START       
+            
+; CP/M 2.2 jump table
+
+STARTJ
+DSPLY       PUSH    DE          ; Save everything
+            PUSH    BC
+            PUSH    AF
+DSPLY1      LD      A,(HL)      ; Loop through the characters
+            CP      CR          ; Done if CR or ETC
+            JR      Z,DSPLY2
+            CP      ETX
+            JR      Z,DSPLYX
+            LD      C,WCHAR
+            LD      E,A
+            PUSH    HL          ; Display while preserving HL
+            CALL    BDOS
+            POP     HL
+            INC     HL
+            JR      DSPLY1      ; Keep loopng
+DSPLY2      LD      C,WCHAR     ; Send the CR/LF from the end of the string
+            LD      E,CR
+            CALL    BDOS
+            LD      C,WCHAR
+            LD      E,LF
+            CALL    BDOS
+DSPLYX      POP     AF          ; Restore everything
+            POP     BC
+            POP     DE
+            RET
+DATE        RET
+TIME        RET
+PARAM       LD      HL,PARM
+            LD      A,(HL)		; Length of extra parameters
+            INC     A           ; One beyond the end
+            LD      B,0
+            LD      C,A
+            ADD     HL,BC
+        	LD      (HL),CR		; End of parameter character
+            LD      HL,PARM+1   ; Skip length
+            CALL	PARAM0		; Process parameters
+            RET
+DSP         PUSH    HL          ; Save everything
+            PUSH    DE
+            PUSH    BC
+            PUSH    AF
+            LD      C,WCHAR
+            LD      E,A         ; Character to print passed in A
+            CALL    BDOS
+            POP     AF
+            POP     BC
+            POP     DE
+            POP     HL            
+            RET
+SETCOLS     LD      HL,DIRCOLS
+            LD      (HL),5
+            RET
+DSPBUFFEREND
+            LD      HL,DSPBUFFER+79
+	        RET
+ENDJ
+
+            INCLUDE utlcore.z80
+            
+            INCLUDE param.z80
+
+            END     VHDUTL
+

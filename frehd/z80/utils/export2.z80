@@ -1,0 +1,491 @@
+;; export2.z80
+;; Timothy Mann, 8/24/97
+;; Frederic Vecoven, 4/15/13 : adapted for trs_hard emulator
+;;
+;;	Copyright (c) 1997, Timothy Mann
+;;
+;;	This software may be copied, modified, and used for any
+;;	purpose without fee, provided that (1) the above copyright
+;;	notice is retained, and (2) modified versions are clearly
+;;	marked as having been modified, with the modifier's name and
+;;	the date included.  
+;;
+;; Use hard drive emulator commands to copy a file from TRS-80 to FAT
+;; Usage: EXPORT2 [-lne] fromfile [unixfile]
+;; Parameter -l will convert the Unix file to lower case.
+;;  (Needed for NEWDOS/80.  They insist on uppercasing the command line.)
+;; If the -n parameter is given, each carriage return ('\r')
+;;  in the TRS-80 file is converted to a newline ('\n') in the Unix file.
+;; The program tries to determine what DOS it is running on and use
+;;  the correct FCB end of file convention, but this works only on
+;;  TRSDOS, LDOS, and NEWDOS/80.  For other DOSes that use the
+;;  NEWDOS/80 convention (such as DOSPLUS), give the -e paramter.
+;; If the unixfile parameter is omitted, the fromfile parameter is used,
+;;  with '/' changed to '.'.
+
+; Assembler Control Flags
+
+CPM         EQU     0
+TRSDOS      EQU     1
+
+;; Model I/III addresses
+@fspec  equ 441ch
+@init   equ 4420h
+@open   equ 4424h
+@close  equ 4428h
+@read   equ 4436h
+@write  equ 4439h
+@error  equ 4409h
+@exit   equ 402dh
+@abort  equ 4030h       
+@put	equ 001bh
+dodcb$	equ 401dh
+
+;; Model 4 SVCs
+@svc	equ 40  ; rst address for SVCs
+;@svc	equ 5   ; older zmac requires 8080-style "rst 5"
+@fspec6	equ 78
+@init6	equ 58
+@open6	equ 59
+@close6	equ 60
+@read6	equ 67
+@write6	equ 75
+@error6	equ 26
+@exit6	equ 22
+@abort6	equ 21
+@dsply6	equ 10
+
+;; Model 4 only: file init or open with wrong LRL.  Can be ignored.
+lrlerr  equ 42
+
+	org 5200h
+
+;; Jump tables for OS independence
+startj:
+fspec:	call @fspec
+	ret
+init:	call @init
+	ret
+open:	call @open
+	ret
+close:	call @close
+	ret
+reed:	call @read
+	ret
+write:	call @write
+	ret
+error:	call @error
+	ret
+exit:	call @exit
+	ret
+abort:	call @abort
+	ret
+dsply:	call dsply5
+	ret
+getern:	call getern5
+	ret
+endj:
+
+; Model 4
+startj6:
+	ld a, @fspec6
+	rst @svc
+	ret
+	ld a, @init6
+	rst @svc
+	ret
+	ld a, @open6
+	rst @svc
+	ret
+	ld a, @close6
+	rst @svc
+	ret
+	ld a, @read6
+	rst @svc
+	ret
+	ld a, @write6
+	rst @svc
+	ret
+	ld a, @error6
+	rst @svc
+	ret
+	ld a, @exit6
+	rst @svc
+	ret
+	ld a, @abort6
+	rst @svc
+	ret
+	ld a, @dsply6
+	rst @svc
+	ret
+	call getern6
+	ret
+
+; Nonzero for LDOS ern convention
+ernldos: db 1
+
+;; Interface defines
+DATA2	  equ 0c2h
+SIZE2     equ 0c3h
+COMMAND2  equ 0c4h
+ERROR2    equ 0c5h
+STATUS    equ 0cfh
+OPENFILE  equ 03h
+READFILE  equ 04h
+WRITEFILE equ 05h
+CLOSEFILE equ 06h
+
+;; FatFS flags
+FA_OPEN_EXISTING equ 00h
+FA_READ          equ 01h
+FA_WRITE         equ 02h
+FA_CREATE_NEW    equ 04h
+FA_CREATE_ALWAYS equ 08h
+FA_OPEN_ALWAYS   equ 10h
+	
+
+
+export:
+	ld a, (000ah)		; Model 4?
+	cp 40h
+	jr z, not4
+	push hl
+	ld de, startj
+	ld hl, startj6
+	ld bc, endj - startj
+	ldir
+	pop hl
+not4:
+	ld a, (4427h)		; system id for Newdos/80...
+	sub 82h			; ...should be 82h (v2.0)
+	jr z, gotid
+	ld a, (441fh)		; system version number for most other DOSes
+	sub 13h			; TRSDOS 1.3?
+gotid:  ld (ernldos), a
+
+flag0:	ld a, (hl)		; look for flags
+	cp ' '
+	jp c, usage		; error if line ends here
+	jr nz, flag1
+	inc hl
+	jr flag0
+flag1:	cp '-'
+	jr nz, fromf
+	inc hl
+	ld a, (hl)
+flag3:	or 20h
+	cp 'e'
+	jr nz, flagl
+	sub a
+	ld (ernldos), a
+	jr flag2
+flagl:	cp 'l'
+	jr nz, flagn		; check for next flag
+	ld a, 1
+	ld (lflag), a
+	jr flag2
+flagn:	cp 'n'
+	jp nz, usage		; unknown flag
+	ld a, 1
+	ld (nflag), a
+flag2:	inc hl
+	ld a, (hl)
+	cp ' '
+	jr nz, flag3		; another flag follows
+	inc hl
+	jr flag0
+
+fromf:	ld de, dcb              ; ready to get LDOS filename from (HL)
+	ld (lfname), hl		; save if needed to default Unix name
+        call fspec
+        jp nz, usage
+
+unix0:	ld a, (hl)              ; scan over Unix filename
+        cp ' '		        ; first skip spaces
+	jr c, usetrs            ; if no Unix name, use translated TRS name
+        jr nz, unix1
+        inc hl
+	jr unix0
+unix1:	ld de, iobuf+1		; copy Unix filename
+	ld a, ' '
+unix2:	cp (hl)
+	ldi
+	jr c, unix2
+	dec de
+	sub a
+	ld (de), a              ; NUL terminate Unix name
+        jr gotu
+
+usetrs: ld hl, (lfname)		; translate TRS-80 name to Unix
+	ld de, iobuf+1
+ut1:	ld a, (hl)
+	cp ':'			; drivespec?
+	jr z, utdone		; done if so
+	cp ' '+1		; end of line?
+	jr c, utdone		; done if so
+	cp '/'			; change '/' to '.' for extension
+	jr nz, notsl
+	ld a, '.'
+notsl:	ld (de), a
+	inc hl
+	inc de
+	jr ut1
+utdone: sub a			; NUL-terminate Unix name
+	ld (de), a
+
+gotu:   ld hl, iobuf
+        ld de, dcb
+        ld b, 0
+        call open               ; open the TRS-80 file
+        pop hl
+        jr z, uname
+	cp lrlerr
+	jr z, uname
+	ld c, a
+        call error
+        jp abort
+
+;;; open the file on the interface side
+;;; 1) issue command OPENFILE to interface
+;;; 2) compute size = flags (1) + strlen(path) + 1 (null terminator)
+;;; 3) send size to interface
+;;; 4) send the bytes to interface
+;;; 5) wait for CIP to clear
+uname:	ld hl, iobuf+1			; path
+	ld a, (lflag)
+	or a
+	call nz, lcconv			; convert filename to lower case
+
+	ld b, 2				; length = 2 (flag + null-terminator)
+	ld a, 0				; null-terminator
+stlen1:	cp (hl)
+	jr z, stlen2
+	inc b				; found a character
+	inc hl
+	jr stlen1
+stlen2:	ld a, OPENFILE
+	out (COMMAND2), a		; send OPENFILE command
+	call wait
+	ld a, b
+	out (SIZE2), a			; send SIZE2
+	ld c, DATA2
+	ld hl, iobuf
+	ld (hl), FA_CREATE_ALWAYS|FA_WRITE
+	otir
+	call wait
+;; Read
+opn2ok:	call getern		; count down records in bc
+
+loop:	ld de, dcb
+	call reed               ; read 256 bytes from file
+        jr z, rdok		; got a full 256 bytes
+	cp 28			; eof?
+	jr z, closit		; yes, OK
+	ld c, a
+        call error              ; oops, i/o error
+        jp abort
+rdok:	dec bc
+
+;; Translate
+	push bc			; save record count
+        ld a, (nflag)		; check for NL feature
+	and a
+	jr z, nlfals
+	ld hl, iobuf
+	ld a, 0dh
+	ld bc, 000ah		; b := 0, c := 0ah
+tloop:	cp (hl)
+	jr nz, notlf
+	ld (hl), c
+notlf:	inc hl
+	djnz tloop
+nlfals:	pop bc			; restore record count
+
+;; Write
+	ld a, c
+	or b			; last record?
+	push bc			; save record count
+	ld bc, 0100h		; byte count
+	jr nz, notlst
+	ld b, a
+	ld a, (dcb+8)
+	ld c, a
+	dec c			; EOF offset 0: write 256 bytes
+	inc bc
+notlst:
+	ld a, WRITEFILE		; send write command
+	out (COMMAND2), a
+	call wait
+	ld a, c			; send size to interface
+	out (SIZE2), a
+	ld b, a
+	ld c, DATA2
+	ld hl, iobuf
+	otir			; send data
+	call wait		; wait until it's written
+	pop bc
+wrok:	ld a, c
+	or b
+	jr nz, loop
+
+;; Close
+closit: ld a, CLOSEFILE		; send close file
+	out (COMMAND2), a
+	call wait
+closok:	ld de, dcb
+        call close              ; close the TRS-80 file
+        jr z, cls2ok
+	ld c, a
+        call error              ; oops, i/o error
+        jp abort
+cls2ok: ld hl, 0	        ; all is well
+	jp exit
+
+;; Usage message
+usage:  ld hl, intro            ; what this program is all about
+        call dsply
+        ld hl, usager           ; error message and exit
+        call dsply
+        jp abort
+
+;; interface error
+uerror: ld hl, error_m		; display error prefix
+	call dsply
+	in a, (ERROR2)		; get error number
+	cp 15h			; check error number
+	jr c, uerrok
+	sub a			; A=0 unknown error
+uerrok:	ld l, a
+	ld h, 00h
+	add hl, hl		; pointers are 2 bytes
+	ld de, error_table
+	add hl, de		; hl points to the pointer
+	ld a, (hl)
+	inc hl
+	ld h, (hl)
+	ld l, a			; hl points to the string
+	call dsply
+        jp abort
+
+;; Display message in HL.  03h terminate, 0dh newline and terminate.
+dsply5:	ld de, dodcb$
+	push hl
+dsply0:	ld a, (hl)
+	cp 03h
+	jr z, dsply1
+	push af
+	call @put
+	pop af
+	inc hl
+	cp 0dh
+	jr nz, dsply0
+dsply1:	pop hl
+	ret
+
+;; Convert (NUL terminated) string in HL to lower case.
+lcconv:	push hl
+	ld d, h
+	ld e, l
+lcloop:	ld a, (hl)
+	cp 5bh			; use '[' or uparrow as escape
+	jr nz, lconv1
+	inc hl
+	ld a, (hl)
+	jr lconv2		; char after esc: don't convert
+lconv1:	sub 'A'
+	cp 26
+	ld a, (hl)
+	jr nc, lconv2
+	or 20h			; convert to lower case
+lconv2:	ld (de), a
+	inc hl
+	inc de
+	or a			; NUL terminator?
+	jr nz, lcloop
+	pop hl
+	ret
+
+;;; wait until the interface is ready
+wait:	ex (sp),hl
+	ex (sp),hl			; small delay to settle the controller
+wait1:	in a, (STATUS)
+	rlca
+	jr c, wait1
+	in a, (STATUS)			; read status again
+	and 01h				; nz = error
+	jr nz, uerror
+	ret
+
+	
+
+;; EOF handling differs between TRS-80 DOSes:
+;;  For TRSDOS 2.3 and LDOS, word (dcb+12) contains the number of
+;;  256 byte records in the file, byte (dcb+8) contains the EOF
+;;  offset in the last record (0=256).
+;;  For NEWDOS/80 and TRSDOS 1.3, byte (dcb+8) and word (dcb+12) 
+;;  form a 24 bit number containing the relative byte address of EOF.
+;;  Thus (dcb+12) differs by one if the file length is not a
+;;  multiple of 256 bytes.  DOSPLUS also uses this convention,
+;;  and NEWDOS 2.1 probably does too (not checked).
+
+; Returns number of (partial or full) records in BC, destroys A
+getern5:
+	ld bc, (dcb+12)
+	ld a, (ernldos)         ; get ERN convention
+	and a
+	ret nz                  ; done if TRSDOS 2.3/LDOS convention
+	ld a, (dcb+8)		; length multiple of 256 bytes?
+	and a
+	ret z                   ; done if so
+	inc bc			; no, # of records = last full record + 1
+	ret	
+
+; All Model 4 mode operating systems should be TRSDOS/LS-DOS 6.x compatible
+getern6:
+	ld bc, (dcb+12)
+	ret
+
+lflag:	defb 0
+nflag:	defb 0
+lfname:	defw 0
+
+intro: defb 'EXPORT2 '
+
+       INCLUDE VERSION.Z80
+
+       defb ' - Export to SD for the FreHD Hard Drive Emulator', 0dh
+usager: defb 'Usage: EXPORT2 [-lne] fromfile [sdfile]', 0dh
+
+error_m: defb 'Error: ', 03h
+fr_unknown: defb 'Unknown error', 0dh			; 0
+fr_disk_err: defb 'Disk error', 0dh			; 1
+fr_int_err: defb 'Internal error', 0dh			; 2
+fr_not_ready: defb 'Drive not ready', 0dh 		; 3
+fr_no_file: defb 'File not found', 0dh	  		; 4
+fr_no_path: defb 'Path not found', 0dh	  		; 5
+fr_invalid_name: defb 'Invalid pathname', 0dh		; 6
+fr_denied: defb 'Access denied', 0dh			; 7
+fr_exist: defb 'File exists', 0dh			; 8
+fr_invalid_obj:	defb 'File/dir object invalid', 0dh	; 9
+fr_write_protected: defb 'Write protected', 0dh		; 10
+fr_invalid_drive: defb 'Invalid drive', 0dh		; 11
+fr_not_enabled:	defb 'Volume not mounted', 0dh		; 12
+fr_no_fs: defb 'No FAT fs found', 0dh			; 13
+fr_mkfs_aborted: defb 'mkfs aborted', 0dh		; 14
+fr_timeout: defb 'Timeout detected', 0dh		; 15
+fr_locked: defb 'File locked', 0dh			; 16
+fr_not_enough_core: defb 'Not enough core', 0dh		; 17
+fr_too_many_open_files:	defb 'Too many open files', 0dh ; 18
+fr_invalid_param: defb 'Invalid parameter', 0dh		; 19
+fr_disk_full: defb 'Disk full', 0dh			; 20
+error_table: defw fr_unknown, fr_disk_err, fr_int_err, fr_not_ready, fr_no_file
+	defw fr_no_path, fr_invalid_name, fr_denied, fr_exist, fr_invalid_obj
+	defw fr_write_protected, fr_invalid_drive, fr_not_enabled
+	defw fr_no_fs, fr_mkfs_aborted, fr_timeout, fr_locked
+	defw fr_not_enough_core, fr_too_many_open_files, fr_invalid_param
+	defw fr_disk_full
+	
+dcb:	defs 48			; 48 for Model III TRSDOS 1.3
+iobuf:	defs 256
+        
+        end export

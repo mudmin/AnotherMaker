@@ -1,0 +1,148 @@
+; VHDUTL - Utility for the Vecoven Hard Drive Emulator
+; Model I, III and 4 DOS Version
+
+; TRS-80 IO Port Definitions
+
+DATA2       EQU     0C2H
+SIZE2       EQU     0C3H
+COMMAND2    EQU     0C4H
+ERROR2      EQU     0C5H
+STATUS      EQU     0CFH
+
+; Assembler Control Flags
+
+CPM         EQU     0
+TRSDOS      EQU     1
+
+
+; Model I/III addresses
+@DSPLY      EQU     4467h
+@DSP        EQU     0033h
+@PARAM      EQU     4454h
+
+; Model 4 SVCs
+@SVC        EQU     40  ; rst address for SVCs
+@DSP6       EQU     2
+@DSPLY6     EQU     10
+@DATE6      EQU     18
+@TIME6      EQU     19
+@PARAM6     EQU     17
+
+            ORG     5200H
+            
+; Model III jump table
+
+STARTJ
+DSPLY       CALL    @DSPLY
+            RET
+DATE        LD      HL,421Ah
+            RET
+TIME        LD      HL,4217h
+            RET
+PARAM       LD      HL,(PARM)       ; Use internal parameter parsing for compability
+            DEC     HL              ; with non-LDOS Model III operating systems
+            CALL	PARAM0
+            RET
+DSP         NOP
+            CALL    @DSP
+            RET
+SETCOLS     LD      HL,DIRCOLS
+            LD      (HL),4
+            RET
+DSPBUFFEREND
+            LD      HL,DSPBUFFER+63
+            RET
+SETUP       LD      A,10H
+            OUT     (0ECH),A        ; Enable External IO Port (required for NewDOS/80)
+            RET                     ; if the Hard Disk drivers have not been loaded
+ENDJ
+
+; Model I jump table
+
+STARTJ1
+DSPLY_1     CALL    @DSPLY
+            RET
+DATE_1      LD      HL,4044h
+            RET
+TIME_1      LD      HL,4041h
+            RET
+PARAM_1     LD      HL,(PARM)       ; Use internal parameter parsing for compability
+            DEC     HL              ; with non-LDOS Model III operating systems
+            CALL	PARAM0
+            RET
+DSP_1       NOP
+            CALL    @DSP
+            RET
+SETCOLS_1   LD      HL,DIRCOLS
+            LD      (HL),4
+            RET
+DSPBUFFEREND_1
+            LD      HL,DSPBUFFER+63
+            RET
+SETUP_1     NOP
+            NOP
+            NOP
+            NOP
+            RET
+ENDJ1
+
+; Model 4 jump table
+
+STARTJ6
+DSPLY_6     LD      A,@DSPLY6 
+            RST     40
+            RET
+DATE_6      LD      HL,33H
+            RET
+TIME_6      LD      HL,2DH
+            RET
+PARAM_6     LD      A,@PARAM6
+            RST     40
+            NOP
+            NOP
+            NOP
+            NOP
+            RET
+DSP_6       LD      C,A
+            LD      A,@DSP6
+            RST     40
+            RET
+SETCOLS_6   LD      HL,DIRCOLS
+            LD      (HL),5
+            RET
+DSPBUFFEREND_6
+            LD      HL,DSPBUFFER+79
+            RET
+SETUP_6     NOP
+            NOP
+            NOP
+            NOP
+            RET
+ENDJ6
+
+VHDUTL
+            PUSH    HL              ; Keep the INBUF pointer
+            LD      (PARM),HL       
+            CALL    WHATVER         ; Identify TRS-80 Model
+            CP      1               ; Model 1?
+            JR      NZ,VHDUTL4      ; No, try for Model 4 instead
+            LD      HL, STARTJ1     ; Start of Model 1 jump table
+            JR      MOVEJUMP
+VHDUTL4     CP      4
+            JR      NZ,VHDINIT      ; Don't know so try default Model III/LDOS settings
+            LD      HL, STARTJ6     ; Start of Model 4 jump table
+MOVEJUMP    LD      DE, STARTJ      ; Overwrite the active jump table    
+            LD      BC, ENDJ - STARTJ
+            LDIR
+VHDINIT     CALL    SETUP           ; Hardware configuration
+
+            INCLUDE utlcore.z80
+
+            INCLUDE param.z80
+
+            INCLUDE trsident.z80
+         
+PARM        DS      2
+               
+            END     VHDUTL
+

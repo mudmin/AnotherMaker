@@ -1,0 +1,533 @@
+; VHDUTL - Core - Shared by Versions for all OS's
+
+; Misc Constants
+
+CR          EQU     0DH
+LF          EQU     0AH
+ETX         EQU     03H
+SPC         EQU     20H
+
+; Directory Attributes
+
+AM_RDO      EQU     001H    	    ; Read only
+AM_HID      EQU     002H            ; Hidden
+AM_SYS      EQU     004H            ; System
+AM_VOL      EQU     008H            ; Volume label
+AM_LFN      EQU     00FH            ; LFN entry
+AM_DIR      EQU     010H            ; Directory
+AM_ARC      EQU     020H            ; Archive
+
+; Vecoven Interface Commands
+
+GETVER      EQU     0
+GETTIME     EQU     1
+SETTIME     EQU     2
+OPENDIR     EQU     8
+READDIR     EQU     9
+MOUNTDRIVE  EQU     0AH
+DRIVEINFO   EQU     0CH
+
+; Other Vecoven Interface Constants
+
+RTCMSGSIZE  EQU     6
+DRVINFOSIZE	EQU		19
+DSPBUFFERLEN    EQU          81
+
+START       
+            CALL    FREHDTST        ; Check interface is installed
+            POP     HL              ; Restore INBUF$ pointer
+            CP      0               ; No?
+            JP      Z,DONE          ; Then done
+
+            LD      DE,PRMTABLE     ; Pointer to parameter table
+            CALL    PARAM
+            JP      NZ,PRMERROR
+
+            IF TRSDOS
+CHKSET      LD      A,(SPARM+1)     ; Set Parameter?
+            CP      0FFH
+            JR      NZ,CHKGET       ; No
+            CALL    SETRTC
+CHKGET      LD      A,(GPARM+1)     ; Get Parameter?
+            CP      0FFH
+            JP      NZ,CHKDIR       ; No
+            CALL    GETRTC
+            ENDIF
+CHKDIR      LD      A,(DPARM+1)     ; Get Directory
+            CP      0FFH
+            JP      NZ,CHKMNT       ; No
+            CALL    GETDIR
+CHKMNT      LD      A,(MPARM+1)     ; Drive mount functions
+            CP      0FFH
+            JP      NZ,CHKVER       ; No
+            CALL    MNT
+CHKVER      LD      A,(VPARM+1)     ; Get Firmware Version?
+            CP      0FFH
+            JP      NZ,PRMERROR     ; No
+            CALL    GETVERSION
+            JP      DONE
+
+MNT         LD      A,(APARM+1)     ; Unit specified?
+            CP      0
+            JP      Z,MNTDISP       ; No so display current config
+            LD      HL,(VHPARM+2)   ; Yes... is VHD File specified?
+            LD      A,(VHPARM+1)
+            OR      (HL)                  
+            JR      NZ,MNT1
+            RET
+
+MNT1        LD      A,0             ; Configure mount flags
+            LD      (MNTFLAGS),A
+            LD      A,(WPARM+1)     ; Write Protected?
+            CP      0FFH
+            JR      NZ,MNT2
+            LD      A,(MNTFLAGS)
+            OR      4
+            LD      (MNTFLAGS),A        
+MNT2        LD      A,(NPARM+1)     ; No Fast Seek?
+            CP      0FFH
+            JR      NZ,MNT3
+            LD      A,(MNTFLAGS)
+            OR      1
+            LD      (MNTFLAGS),A
+MNT3        LD      A,(CPARM+1)     ; Create?
+            CP      0FFH
+            JR      NZ,MNT4
+            LD      A,(MNTFLAGS)
+            OR      2
+            LD      (MNTFLAGS),A
+MNT4        CALL    DONESTUFF
+            CALL    VHPARM          ; Clean up the filename
+            LD      A,(TEMP)       
+            CP      0               ; Invalid... likely too long
+            JR      NZ,MNT6
+            RET
+MNT6        LD      A,(TEMP)        ; Get filename size
+            ADD     A,2             ; Request size is filename + terminator + 2 bytes
+            OUT     (SIZE2),A
+            LD      A,MOUNTDRIVE
+            OUT     (COMMAND2),A
+            CALL    WAIT
+            LD      A,(APARM+1)     ; Get Drive Number
+            DEC     A               ; Change to 0 offset
+            OUT     (DATA2),A
+            LD      A,(MNTFLAGS)    ; Get Mount Flags
+            OUT     (DATA2),A
+            LD      HL,(VHPARM+1)   ; Get filename address
+            LD      C,DATA2
+            LD      A,(TEMP)        ; Length of filename
+            LD      B,A
+            OTIR
+            CALL    WAIT
+            IN      A,(STATUS)
+            AND     01h             ; Check if TRS_HARD_ERR set?
+            JR      Z,MNT7          ; No all good otherwise tell the user
+            LD      HL,MSGMNTFAIL
+            CALL    DSPLY
+            CALL    UERROR          ; Report the error
+            RET                     
+            
+MNT7        CALL    CLRDSPBUFFER
+            LD      HL,MSGMNTOK+2   ; Messaging skipping over the length
+            LD      DE,DSPBUFFER
+            LD      BC,(MSGMNTOK)
+            LDIR
+            LD      A,(HPARM+1)     ; Halt after change requested?
+            CP      0FFH
+            JR      NZ,MNTNOHLT     ; No so just report mount successfull
+MNTHLT      LD      HL,MSGMNTHLT+2    ; Yes... so report mount successfull
+            LD      BC,(MSGMNTHLT)
+            LDIR
+            CALL    DSPDSPBUFFER
+MNTHLT2     JR      MNTHLT2         ; ... and Halt
+            RET
+MNTNOHLT    CALL    DSPDSPBUFFER
+            RET
+MNTDISP     LD      A,DRIVEINFO	    ; Request Drive Info
+            OUT     (COMMAND2),A
+            CALL    WAIT
+            IN      A,(SIZE2)       ; Read the DRIVEINFO structure
+            LD      B,A
+            LD      C,DATA2
+            LD      HL,BUFFER
+            INIR
+            CALL    CLRDSPBUFFER
+            LD      HL,MNTTITLE
+            CALL    DSPLY
+            LD      A,'-'
+            CALL    LDDSPBUFFER		; Header
+            CALL    DSPDSPBUFFER
+            LD		IX,BUFFER
+            LD      A,1             ; Unit Counter
+            LD      (TEMP),A
+            IN      A,(SIZE2)
+MNTDSP2     PUSH	AF              ; Process the DRIVEINFO structure
+            LD		A,(IX+0)        ; Available?
+            CP		0
+            JP		Z,MNTDSP4       ; No
+            CALL    CLRDSPBUFFER
+            LD		HL,DSPBUFFER+20 ; Indicate Write Protected
+            LD		(HL),'N'        ; Default No
+            LD      A,(IX+1)        ; Write Protect (=1)
+            CP		1
+            JR		NZ,MNTDSP21
+            LD		(HL),'Y'
+MNTDSP21    LD      HL,DSPBUFFER+40 ; Indicate Fast Mode
+            LD      (HL),'Y'        ; Default Yes
+            LD      A,(IX+0)        ; Fast Seek?
+            CP      1               ; No (=1)
+            JR      NZ,MNTDSP22
+            LD      (HL),'N'        ; No
+MNTDSP22    LD		A,(IX+2)        ; Cylinders MSB
+            LD		H,A
+            LD		A,(IX+3)        ; Cylinders LSB
+            LD		L,A
+            LD		DE,NUMBUFFER    ; Convert to string
+            CALL	NUM2DEC
+            LD		HL,NUMBUFFER    ; Clear leading 2 zeros
+            LD		BC,2 << 8
+            CALL	CLRLEADZERO
+            LD		HL,NUMBUFFER    ; Insert into display buffer
+            LD		DE,DSPBUFFER+27
+            LD		BC,5
+            LDIR
+            LD		A,(IX+4)        ; Heads
+            LD		H,0
+            LD      L,A
+            LD		DE,NUMBUFFER
+            CALL	NUM2DEC
+            LD		HL,NUMBUFFER    ; Clear leading 4 zeros
+            LD		BC,4 << 8
+            CALL	CLRLEADZERO	    
+            LD		HL,NUMBUFFER+3  ; Insert last 2 digits into display buffer
+            LD		DE,DSPBUFFER+37
+            LD		BC,2
+            LDIR
+            LD      A,(TEMP)        ; Unit counter
+            LD      HL,0
+            LD      L,A
+            LD      DE,NUMBUFFER
+            CALL    NUM2DEC
+            LD      HL,NUMBUFFER+4  ; Insert single digit into display buffer
+            LD      DE,DSPBUFFER+3
+            LD      BC,1
+            LDIR
+            PUSH    IX
+            POP     HL
+            LD      BC,6
+            ADD     HL,BC
+            PUSH    HL
+            LD		BC,0
+MNTDSP2A    LD      A,(HL)          ; Find first 00h to know length of the name    
+            CP      0
+            JR      Z,MNTDSP2B      ; First 00h found
+            INC     HL
+            INC	    BC
+            JR      MNTDSP2A
+MNTDSP2B    POP     HL      	    ; Name into display buffer
+            LD      DE,DSPBUFFER+6
+            LDIR
+            CALL    DSPDSPBUFFER    ; Display line
+            LD      BC,DRVINFOSIZE  ; Move index to next entry
+            ADD     IX,BC
+MNTDSP4     LD      A,(TEMP)
+            INC     A
+            LD      (TEMP),A
+            POP	    AF
+            SUB     DRVINFOSIZE     ; Check if more drives to process
+            JP      NZ,MNTDSP2		; No zero so back for another drive
+            CALL    DONESTUFF
+            RET
+
+GETVERSION 	CALL    DONESTUFF
+
+			INCLUDE	GETVERSION.Z80
+			
+GETDIR      CALL    DONESTUFF
+            CALL    SETCOLS         ; Setup column count
+            LD      A,2             ; Default to the "current" directory
+            OUT     (SIZE2),A
+            LD      A,OPENDIR
+            OUT     (COMMAND2),A
+            CALL    WAIT
+            LD      A,"/"
+            OUT     (DATA2),A
+            LD      A,00H
+            OUT     (DATA2),A
+            CALL    WAIT
+            IN      A,(STATUS)      ; Check for HARD_ERR indicating open failed
+            AND     01h
+            JR      NZ,GETDIRX      ; Open failed
+GETDIR2     LD      A,READDIR       ; Request directory entry
+            OUT     (COMMAND2),A
+            CALL    WAIT
+            IN      A,(STATUS)      ; Check for Error
+            AND     01h
+            JR      NZ,GETDIRERROR
+            IN      A,(STATUS)      ; Check for DRQ indicating data available
+            AND     08h
+            JR      Z,GETDIRX       ; No DRQ so done
+            IN      A,(SIZE2)       ; Otherwise read the FILINFO structure
+            LD      B,A
+            LD      C,DATA2
+            LD      HL,BUFFER 
+            INIR
+            LD      A,(BUFFER+8)    ; Check File attribute for Volume label/hidden/directory
+            AND     AM_VOL OR AM_HID OR AM_DIR
+            JR      NZ,GETDIR2      ; Yes so ignore this file
+            LD      HL,BUFFER+24    ; ETX at the end to make printing easy
+            LD      (HL),ETX        ; This is 4 bytes after the end of the 8.3 filename because we want 16 columns
+            LD      HL,BUFFER+9     ; Find first 00h and then make all characters SPC until ETX
+GETDIR3     LD      A,(HL)          
+            CP      0
+            JR      Z,GETDIR4       ; First 00h found
+            INC     HL
+            JR      GETDIR3
+GETDIR4     LD      (HL),SPC        ; Replace with SPC
+            INC     HL              ; and keep going until we get to ETX
+            LD      A,(HL)
+            CP      ETX
+            JR      Z,GETDIR5
+            JR      GETDIR4
+GETDIR5     LD      HL,DIRCOLS      ; Used another column
+            DEC     (HL)
+            JR      NZ,GETDIR6      ; Last column for the row?
+            CALL    SETCOLS         ; Yes so reset and CR at the end of this filename
+            LD      HL,BUFFER+22
+            LD      (HL),CR
+GETDIR6     LD      HL,BUFFER+9     ; Display the filename
+            CALL    DSPLY
+            JR      GETDIR2         ; Check for more files
+GETDIRX     LD      HL,BUFFER       ; Force a new line at the end
+            LD      (HL),CR
+            CALL    DSPLY
+            RET
+GETDIRERROR CALL    UERROR          ; Report the error
+            RET
+            
+GETRTC      CALL    DONESTUFF
+            CALL    DS1307RD        ; Read DS1307
+            RET
+
+SETRTC      CALL    DONESTUFF
+            CALL    DS1307WR        ; Write to the interface
+DONE        RET
+
+PRMERROR    LD      A,(ACTIONS)     ; Do anything?
+            CP      0
+            JR      Z,PRMERROR2     ; No so explain usage
+            JP      DONE
+PRMERROR2   LD      HL,MSG          ; Welcome Message
+            CALL    DSPLY
+            LD      HL,MSGUSAGE     ; Explain usage
+            CALL    DSPLY
+            JP      DONE
+
+PRMTABLE    DB      'SET   '
+            DW      SPARM+1
+            DB      'S     '
+            DW      SPARM+1
+            DB      'GET   '
+            DW      GPARM+1
+            DB      'G     '
+            DW      GPARM+1
+            DB      'VER   '
+            DW      VPARM+1
+            DB      'V     '
+            DW      VPARM+1
+            DB      'DIR   '
+            DW      DPARM+1
+            DB      'D     '
+            DW      DPARM+1
+            DB      'MNT   '
+            DW      MPARM+1
+            DB      'ADDR  '
+            DW      APARM+1
+            DB      'VHD   '
+            DW      VHPARM+1
+            DB      'HALT  '
+            DW      HPARM+1
+            DB      'WP    '
+            DW      WPARM+1
+            DB      'CREATE'
+            DW      CPARM+1
+            DB      'NFS   '
+            DW      NPARM+1
+            NOP
+
+SPARM       LD      BC,0
+GPARM       LD      BC,0
+VPARM       LD      BC,0
+DPARM       LD      BC,0
+MPARM       LD      BC,0
+APARM       LD      BC,0
+HPARM       LD      BC,0
+WPARM       LD      BC,0
+CPARM       LD      BC,0
+NPARM       LD      BC,0
+VHPARM      LD      HL,0            ; Address set when parameters are loaded
+            LD      A,0             ; Length returned in TEMP
+            LD      (TEMP),A
+            LD      A,(HL)          ; Get the first character of the filename
+            CP      '/'             ; Leading /
+            JR      Z,VHPARM2       ; Yes so check the rest of the filename
+            DEC     HL
+            LD      A,'/'
+            LD      (HL),A          ; Force / as the first character of the filename
+            LD      (VHPARM+1),HL
+VHPARM2     LD      A,(TEMP)        ; Count characters
+            INC     A
+            CP      14              ; Max characters for name + terminator + 1   
+            JR      Z,VHPARMFAIL    ; Exceeded so return empty string         
+            LD      (TEMP),A
+            LD      A,(HL)          ;
+            CP      '"'             ; Quote terminator
+            JR      Z,VHPARMDONE    ; Yes... at the end
+            INC     HL
+            JP      VHPARM2         ;             
+VHPARMDONE  LD      A,0             ; Terminate with \0
+            LD      (HL),A
+            RET
+VHPARMFAIL  LD      A,0
+            LD      (TEMP),A
+            RET
+                        
+FREHDTST    LD      A,GETVER        ; Test that the interface exists
+            OUT     (COMMAND2),A
+            CALL    WAIT
+            IN      A,(SIZE2)
+            CP      6
+            JR      NZ,FREHDTSTX    ; Size of 6 indicates interface exists
+            LD      A,1             ; Return HAS IF
+            RET
+FREHDTSTX   LD      HL,MSG          ; Welcome Message
+            CALL    DSPLY
+            LD      HL,MSGNOIF
+            CALL    DSPLY
+            LD      A,0             ; Return NO IF
+            RET
+            
+DS1307RD    LD      A,GETTIME
+            OUT     (COMMAND2),A
+            CALL    WAIT
+            CALL    TIME            ; LDOS Time Buffer
+            LD      BC,3<<8 OR DATA2
+            INIR
+            CALL    DATE            ; LDOS Date Buffer
+            LD      B,3
+            INIR
+            RET
+DS1307WR    LD      A,SETTIME
+            OUT     (COMMAND2),A
+            CALL    WAIT
+            CALL    TIME            ; LDOS Time Buffer
+            LD      BC,3<<8 OR DATA2
+            OTIR
+            CALL    DATE            ; LDOS Date Buffer
+            LD      B,3
+            OTIR
+            CALL    WAIT
+            RET
+
+WAIT        EX      (SP),HL
+            EX      (SP),HL         ; small delay to settle the controller
+WAIT1       IN      A,(STATUS)
+            CP      0FFH            ; No interface on the bus
+            JR      Z,WAIT2         ; .. then drop out and report error
+            RLCA
+            JR      C,WAIT1
+WAIT2       RET
+
+; Clear ro load the display buffer
+; Call with HL = Buffer start, A = Insert character
+; Uses DE and BC
+
+LDDSPBUFFER
+            LD      HL,DSPBUFFER	; Load buffer with character passed in A
+            LD      (HL),A
+            JP     CLRDSPBUFFER2
+CLRDSPBUFFER
+            LD      HL,DSPBUFFER	; Load buffer with spaces
+            LD      (HL),SPC
+CLRDSPBUFFER2	    
+            PUSH    HL
+            POP     DE
+    	    INC     DE
+	        LD      BC,DSPBUFFERLEN-1
+	        LDIR
+	        CALL    DSPBUFFEREND
+            LD      (HL),CR
+            RET
+
+DSPDSPBUFFER
+            LD      HL,DSPBUFFER	;
+            CALL    DSPLY
+            RET
+
+; Clear leading 0's from the number to string buffer
+; Call with HL = START, BC = Number of bytes to process
+
+CLRLEADZERO
+            LD      A,(HL)          
+            CP      30h
+            JR      NZ,CLRLEADZERO2
+            LD      (HL),SPC
+CLRLEADZERO2
+            INC     HL
+    	    DJNZ    CLRLEADZERO
+            RET
+
+; Number handling routines from http://baze.au.com/misc/z80bits.html
+
+NUM2DEC     LD	    BC,-10000
+            CALL    NUM1
+            LD      BC,-1000
+            CALL    NUM1
+            LD  	BC,-100
+            CALL	NUM1
+            LD      C,-10
+            CALL    NUM1
+            LD      C,B
+
+NUM1        LD      A,'0'-1
+NUM2        INC     A
+            ADD     HL,BC
+            JR      C,NUM2
+            SBC     HL,BC
+            LD      (DE),A
+            INC     DE
+            LD      A,0
+    	    LD	    (DE),A
+            RET
+
+DONESTUFF   LD      HL,ACTIONS      ; Need to know if we have done anything
+            INC     (HL)
+            RET
+
+                   
+ACTIONS     DB      0
+DS1307      DS      6
+MSG         DB      'VHDUTL '
+
+            INCLUDE VERSION.Z80
+            
+            DB      ' - Utilities for the FreHD Hard Drive Emulator',CR
+MSGNOIF     DB      'Interface not found',CR
+MSGUSAGE    DB      'Usage: VHDUTL ('
+            IF TRSDOS
+            DB      'GET,SET,'
+            ENDIF
+            DB      'VER,DIR,MNT,[ADDR,VHD="",HALT,WP,CREATE,NFS])',CR
+MSGMNTOK    DB      11,0,'Mounted OK.'
+MSGMNTHLT   DB      13,0,'  Press Reset'
+MSGMNTFAIL  DB      'Mount Failed',CR
+MSGDIRERROR DB      'Error Reading Directory',CR
+MNTTITLE    DB      'Addr  Disk File     WP Cylinders  Heads Fast',CR
+BUFFER      DS      64
+NUMBUFFER   DS      16
+DSPBUFFER   DS      DSPBUFFERLEN
+DIRCOLS     DB      0
+TEMP		DB		0
+MNTFLAGS    DB      0
+
+			INCLUDE	FATFSERR.Z80

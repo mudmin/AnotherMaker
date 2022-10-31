@@ -1,0 +1,12 @@
+; VHDUTL - Utility for the Vecoven Hard Drive Emulator
+; TRS-80 CP/M 2.2 Version
+
+; TRS-80 IO Port Definitions
+
+DATA2       EQU     0C2H
+SIZE2       EQU     0C3H
+COMMAND2    EQU     0C4H
+ERROR2      EQU     0C5H
+STATUS      EQU     0CFH
+
+            INCLUDE vhdutl_cpm.z80

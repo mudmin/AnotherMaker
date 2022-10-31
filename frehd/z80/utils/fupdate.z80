@@ -1,0 +1,371 @@
+;; fupdate.z80
+;; Frederic Vecoven, 4/15/13
+;;
+;; Usage: FUPDATE fromfile
+;;
+;; FUPDATE will put the hard drive emulator in bootloader mode, and send
+;; the HEX file using the TRS80.
+;;
+
+; Assembler Control Flags
+
+CPM         EQU     0
+TRSDOS      EQU     1
+
+;; Model I/III addresses
+@fspec  equ 441ch
+@init   equ 4420h
+@open   equ 4424h
+@close  equ 4428h
+@read   equ 4436h
+@write  equ 4439h
+@error  equ 4409h
+@exit   equ 402dh
+@abort  equ 4030h
+@put	equ 001bh
+@dsp    equ 0033h
+@dsply  equ 4467h
+dodcb$	equ 401dh
+
+
+;; Model 4 SVCs
+@svc	equ 40  ; rst address for SVCs
+;@svc	equ 5   ; older zmac requires 8080-style "rst 5"
+@fspec6	equ 78
+@init6	equ 58
+@open6	equ 59
+@close6	equ 60
+@read6	equ 67
+@write6	equ 75
+@error6	equ 26
+@exit6	equ 22
+@abort6	equ 21
+@dsply6	equ 10
+@dsp6	equ 2
+
+;; Model 4 only: file init or open with wrong LRL.  Can be ignored.
+lrlerr  equ 42
+
+;; Interface defines
+DATA2	  equ 0c2h
+SIZE2     equ 0c3h
+COMMAND2  equ 0c4h
+STATUS    equ 0cfh
+READC5	  equ 0c5h	; should read 4F in bootloader mode
+
+
+	org 5200h
+
+;; Jump tables for OS independence
+startj:
+fspec:	call @fspec
+	ret
+init:	call @init
+	ret
+open:	call @open
+	ret
+close:	call @close
+	ret
+reed:	call @read
+	ret
+write:	call @write
+	ret
+error:	call @error
+	ret
+exit:	call @exit
+	ret
+abort:	call @abort
+	ret
+dsply:	call @dsply
+	ret
+dsp:    ld a,c	
+    call @dsp
+	ret
+getern:	call getern5
+	ret
+endj:
+
+; Model 4
+startj6:
+	ld a, @fspec6
+	rst @svc
+	ret
+	ld a, @init6
+	rst @svc
+	ret
+	ld a, @open6
+	rst @svc
+	ret
+	ld a, @close6
+	rst @svc
+	ret
+	ld a, @read6
+	rst @svc
+	ret
+	ld a, @write6
+	rst @svc
+	ret
+	ld a, @error6
+	rst @svc
+	ret
+	ld a, @exit6
+	rst @svc
+	ret
+	ld a, @abort6
+	rst @svc
+	ret
+	ld a, @dsply6
+	rst @svc
+	ret
+	nop                ; Keep byte count the same as DSP
+	ld a, @dsp6
+	rst @svc
+	ret
+	call getern6
+	ret
+
+; Nonzero for LDOS ern convention
+ernldos: db 1
+
+
+fupdate:
+	ld a, (000ah)		; Model 4?
+	cp 40h
+	jr z, not4
+	push hl
+	ld de, startj
+	ld hl, startj6
+	ld bc, endj - startj
+	ldir
+	pop hl
+not4:
+	ld a, (4427h)		; system id for Newdos/80...
+	sub 82h			; ...should be 82h (v2.0)
+	jr z, gotid
+	ld a, (441fh)		; system version number for most other DOSes
+	sub 13h			; TRSDOS 1.3?
+gotid:  ld (ernldos), a
+
+fromf:	ld de, dcb              ; ready to get LDOS filename from (HL)
+        call fspec
+        jp nz, usage		; Z set if valid
+
+	ld hl, iobuf
+        ld de, dcb
+        ld b, 0
+        call open               ; open the TRS-80 file
+        ;pop hl
+        jr z, opn2ok		; Z set if success
+	cp lrlerr
+	jr z, opn2ok
+	ld c, a			; A error number
+        call error
+        jp abort
+
+;; Enter bootloader
+opn2ok:	ld hl, welcom		; welcome message
+	call dsply
+
+	call inboot		; already in bootloader ?
+	jr z, opn4ok		; yes
+	
+	ld hl,boot2		; print "entering bootloader"
+	call dsply
+	ld a, 07h		; enter bootloader
+	out (COMMAND2), a
+	call wait
+	ld a, 15h
+	out (DATA2), a
+	ld a, 04h
+	out (DATA2), a
+	call wait
+	out (SIZE2), a		; flush eventual buffer in interface
+	call wait
+	call inboot		; check again
+	jr z, opn3ok		; OK !
+	ld hl, notboot		; didn't enter bootloader => error
+	call dsply
+	jp abort
+
+opn4ok:	ld hl,boot1		; "already in bootloader"
+	call dsply
+
+opn3ok: ld hl,eraseF		; we are in bootloader. Send ERASE.
+eloop:	ld a,0dh		; 0D ?
+	cp (hl)
+	jr z,ecom		; yes, commit erase
+	ld a,(hl)		; no, send byte
+	out (DATA2),a
+	inc hl
+	jp eloop
+ecom:	out (SIZE2),a		; commit
+	call wait
+	in a, (STATUS)
+	call disp_status
+
+
+;; Read
+	ld de, dcb
+	call getern		; count down records in bc
+
+loop:	ld de, dcb
+	ld hl, iobuf
+	call reed               ; read 256 bytes from file
+        jr z, rdok		; got a full 256 bytes
+	cp 28			; eof?
+	jr z, closok		; yes, OK
+	ld c, a
+        call error              ; oops, i/o error
+        jp abort
+rdok:	dec bc
+
+;; Process
+	push bc			; save record count
+
+	ld a, c
+	or b			; Z : last record 
+	ld b, 00h		; byte count
+	jr nz, tloop		; jump if not last record
+	ld a, (dcb+8)
+	ld b, a
+
+tloop:	ld a, 0dh		; 0D ?
+	cp (hl)
+	jr z, dolf
+	ld a, 0ah		; 0A ?
+	cp (hl)
+	jr nz,notlf
+dolf:	ld a, (flag)		; anything to commit ?
+	and a
+	jr z, nextb		; no
+	out (SIZE2), a		; yes
+	call wait		; wait until the interface is no more busy
+	in a, (STATUS)		; get status
+	call disp_status
+	xor a
+	ld (flag), a		; clear flag
+	jr nextb	
+notlf:	ld a, (hl)		; get one byte
+	out (DATA2), a		; send it to the interface
+	ld a, 1
+	ld (flag), a		; set flag
+nextb:	inc hl			; next byte
+	djnz tloop
+	
+	pop bc			; restore record count
+
+	ld a, c			; next chunk, if any
+	or b
+	jr nz, loop
+
+
+closok:	ld de, dcb
+        call close              ; close the TRS-80 file
+        jr z, cls2ok
+	ld c, a
+        call error              ; oops, i/o error
+        jp abort
+cls2ok: 
+        ld  hl,usager-1
+        call dsply
+ETX			EQU		3
+GETVER		EQU		0
+
+		include GETVERSION.Z80
+
+    ld hl,0
+    jp exit
+    
+;;; check if we are in bootloader mode (Z set if in bootloader)
+inboot: call wait
+	in a, (READC5)
+	in a, (READC5)
+	cp 04Fh
+	ret
+
+
+;;; wait until the interface is ready
+wait:	ex (sp),hl
+	ex (sp),hl			; small delay to settle the controller
+wait1:	in a, (STATUS)
+	rlca
+	jr c, wait1
+	ret
+
+;;; display A = status as a char
+disp_status:
+	push hl
+	and 07h
+	ld l, a
+	ld h, 00h
+	ld de, status_chars
+	add hl, de		; hl points to the char
+	ld c, (hl)
+	;push af
+	call dsp
+	;pop af
+	pop hl
+	ret
+
+	
+;; Usage message
+usage:  ld hl, intro            ; what this program is all about
+        call dsply
+        ld hl, usager           ; error message and exit
+        call dsply
+        jp abort
+
+;; EOF handling differs between TRS-80 DOSes:
+;;  For TRSDOS 2.3 and LDOS, word (dcb+12) contains the number of
+;;  256 byte records in the file, byte (dcb+8) contains the EOF
+;;  offset in the last record (0=256).
+;;  For NEWDOS/80 and TRSDOS 1.3, byte (dcb+8) and word (dcb+12) 
+;;  form a 24 bit number containing the relative byte address of EOF.
+;;  Thus (dcb+12) differs by one if the file length is not a
+;;  multiple of 256 bytes.  DOSPLUS also uses this convention,
+;;  and NEWDOS 2.1 probably does too (not checked).
+
+; Returns number of (partial or full) records in BC, destroys A
+getern5:
+	ld bc, (dcb+12)
+	ld a, (ernldos)         ; get ERN convention
+	and a
+	ret nz                  ; done if TRSDOS 2.3/LDOS convention
+	ld a, (dcb+8)		; length multiple of 256 bytes?
+	and a
+	ret z                   ; done if so
+	inc bc			; no, # of records = last full record + 1
+	ret	
+
+; All Model 4 mode operating systems should be TRSDOS/LS-DOS 6.x compatible
+getern6:
+	ld bc, (dcb+12)
+	ret
+
+
+intro: defb 'FUPDATE '
+
+       INCLUDE VERSION.Z80
+
+       defb ' - Firmware Update for the FreHD Hard Drive Emulator', 0dh
+usager: defb 'Usage: FUPDATE fromfile', 0dh
+welcom:	defb 'Hard Drive Emulator Firmware Update', 0dh
+notboot:defb 'Error: cannot enter bootloader mode', 0dh
+boot1:	defb 'Interface already in bootloader', 0dh
+boot2:	defb 'Entering bootloader...', 0dh
+status_chars:	defb '.'  ; ok
+	defb 'R'	  ; range error
+	defb 'I'	  ; ignored
+	defb 'C'	  ; checksum error
+	defb 'X'	  ; invalid
+	defb 'S'	  ; sequence error
+	defb 'P'	  ; protected
+	defb '?'	  ; n/a
+
+eraseF:	defb ':02FF00060000F9', 0Dh, 0h
+
+flag:	defb 0
+dcb:	defs 48			; 48 for Model III TRSDOS 1.3
+iobuf:	defs 256
+        
+        end fupdate

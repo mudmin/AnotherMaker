@@ -1,0 +1,153 @@
+; TRS80 Hard Disk Write/Read Test
+;
+; Caution: Destroys all data on the first n cylinders
+
+DATA        EQU     0C8H            ;Data transfer port
+ERROR       EQU     DATA+1          ;Error code port
+WRP         EQU     DATA+1          ;Write precompensation port
+SECNT       EQU     DATA+2          ;Sector count
+SECTOR      EQU     DATA+3          ;Sector number port
+CYLLSB      EQU     DATA+4          ;Cylinder lo
+CYLMSB      EQU     DATA+5          ;Cylinder hi
+SDH         EQU     DATA+6          ;Size/Drive/Head port
+STATUS      EQU     DATA+7          ;Status port
+COMMAND     EQU     DATA+7          ;Command port
+
+CMD_WRITE   EQU     030H
+CMD_READ    EQU     020H
+
+SECTRK      EQU     32
+MAXCYLS     EQU     16
+
+CONVINT     EQU     0FBDH
+CLS         EQU     01C9H
+DSP         EQU     0033H
+DSPSTR      EQU     28A7H
+
+            ORG     5200H
+START       IN      A,(STATUS)
+            AND     80H                 ; Check ready
+            JR      NZ,START            ; wait if not
+            CALL    CLS
+            CALL    DSPCYL
+LOOP        LD      A,(WSDH)
+            OUT     (SDH),A
+            LD      A,(WCYLLSB)
+            OUT     (CYLLSB),A
+            LD      A,(WCYLMSB)
+            OUT     (CYLMSB),A
+            LD      A,(WSECTOR)
+            OUT     (SECTOR),A
+            CALL    FILLS1              ; Fill with Sector #
+            LD      A,CMD_WRITE         ; Write sector to disk
+            OUT     (COMMAND),A
+            LD      HL,SECTOR1
+            LD      BC,0 << 8 | DATA
+            OTIR
+            CALL    WAIT
+            JR      NZ,DSPERROR         ; Error in Status?
+            LD      A,CMD_READ          ; Read the sector from disk
+            OUT     (COMMAND),A
+            CALL    WAIT
+            JR      NZ,DSPERROR         ; Error in Status?
+            LD      HL,SECTOR2
+            LD      BC,0 << 8 | DATA
+            INIR
+            CALL    COMPARE             ; Compare sector and halt if failed
+LOOP1       LD      A,(WSECTOR)         ; Sectors count down
+            DEC     A
+            JR      NZ,LOOP2            ; 
+            LD      A,(WCYLLSB)         ; Next Cylinder
+            INC     A
+            CP      MAXCYLS             ; Done enough?
+            JR      Z,DONE              ; Yes
+            LD      (WCYLLSB),A
+            CALL    DSPNEWLINE         
+            CALL    DSPCYL 
+            LD      A,SECTRK            ; First sector on the cylinder
+LOOP2       LD      (WSECTOR),A
+            JR      LOOP                ; And round again
+DONE        JR      DONE
+
+DSPERROR    LD      A,'E'
+            CALL    DSP
+            JR      LOOP1
+; 
+
+DSPNEWLINE  LD      A,01AH              ; New Line
+            CALL    DSP
+            LD      A,01DH              ; Carriage Return
+            CALL    DSP
+            RET
+
+DSPCYL      LD      A,(WCYLLSB)
+            LD      C,A
+            CALL    DISP8
+            RET
+            
+; Compare Sector Buffers and halt if different
+
+COMPARE     LD      HL,SECTOR1
+            LD      DE,SECTOR2
+            LD      B,0FFH
+COMPARE2    LD      A,(DE)
+            CP      (HL)
+            JR      NZ,COMPAREH         ; Match fails
+            INC     HL
+            INC     DE
+            DJNZ    COMPARE2
+            LD      A,'.'
+            CALL    DSP
+            RET
+
+COMPAREH    LD      A,'X'
+            CALL    DSP
+            RET
+
+            
+; Fill Sector Buffer 1 with A
+
+FILLS1      LD      HL,SECTOR1
+            LD      DE,SECTOR1+1
+            LD      (HL),A
+            LD      BC,0FFH
+            LDIR
+            RET
+
+; Wait
+
+WAIT        EX      (SP),HL             ; Settle controller
+            EX      (SP),HL         
+WAIT2       IN      A,(STATUS)          ; Wait until controller
+            RLCA                        ; is no longer busy
+            JR      C,WAIT2
+            IN      A,(STATUS)          ; Get status again
+            AND     00000001B           ; NZ=error
+            RET
+
+; Display C in HEX
+
+DISP8:      LD      A,C
+            RRA
+            RRA
+            RRA
+            RRA
+            CALL    DISP8B
+            LD      A,C
+DISP8B:     AND     00FH
+            ADD     A,090H
+            DAA
+            ADC     A,040H
+            DAA
+            CALL    DSP
+            RET
+
+SECTOR1     DS      100H
+SECTOR2     DS      100H
+
+WSDH        DB      0
+WCYLLSB     DB      0
+WCYLMSB     DB      0
+WSECTOR     DB      SECTRK
+            END     START
+            

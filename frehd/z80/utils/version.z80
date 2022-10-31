@@ -1,0 +1,12 @@
+; Utilities Common Version number
+
+            DB      '2.03'
+
+; Includes machine name in the version message
+; Can't find another way of doing this
+
+IF CPM
+IF (COMMAND2 = 08CH)
+            DB      ' (Kaypro)'
+ENDIF
+ENDIF

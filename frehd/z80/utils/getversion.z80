@@ -1,0 +1,57 @@
+            LD      A,GETVER
+            OUT     (COMMAND2),A
+            CALL    WAIT
+            LD      HL,MSGVER       ; Version Label
+            CALL    DSPLY
+            CALL    GETVERSION2     ; Display Details
+            LD      HL,MSGBVER      ; Boot Loader Version Label
+            CALL    DSPLY
+            CALL    GETVERSION2     ; Display Details
+            RET
+            
+GETVERSION2 IN		A,(DATA2)		; Major Version Number
+            CALL	DSVERSION
+            LD		A,'.'
+            LD		C,A
+            CALL	DSP
+            IN		A,(DATA2)		; Minor Version Number
+            CALL	DSVERSION2
+            RET
+			
+DSVERSION   CALL	BIN2BCD			; Enter here to mask the leading 0
+            PUSH	AF
+            AND		0F0H			; Mask out the lower digit
+            JR		Z,DSVERSION4
+            JR		DSVERSION3
+
+DSVERSION2  CALL	BIN2BCD			; Enter here to keep the leading 0
+            PUSH	AF
+            AND		0F0H
+DSVERSION3  SRL		A
+            SRL		A
+            SRL		A
+            SRL		A
+            ADD		A,30H			; To ASCII
+            CALL	DSP             ; LDOS 6 wants in C, LDOS 5 in A - DSP handles this
+DSVERSION4  POP		AF
+            AND		00FH			; Mask out the upper digit
+            ADD		A,30H			; To ASCII
+            LD		C,A
+            CALL	DSP
+            RET
+
+BIN2BCD     LD		BC,0
+BIN2BCD1    SUB		10				; Count number of 10's deducted into B
+            JP		M,BIN2BCD2
+            INC		B
+            JR		BIN2BCD1
+BIN2BCD2    ADD		A,10			; Add back the last 10
+            SLA		B				; Move the 10's into the top 4 bits
+            SLA		B
+            SLA		B
+            SLA		B
+            OR		B				; Merge in the 10's
+            RET
+
+MSGVER      DB      'Firmware: ',ETX
+MSGBVER     DB      '  Boot Loader: ',ETX

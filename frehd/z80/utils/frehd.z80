@@ -1,0 +1,90 @@
+DATA2	    EQU     0c2h
+SIZE2       EQU     0c3h
+COMMAND2    EQU     0c4h
+ERROR2      EQU     0c5h
+STATUS      EQU     0cfh
+OPENFILE    EQU     03h
+READFILE    EQU     04h
+WRITEFILE   EQU     05h
+CLOSEFILE   EQU     06h
+	    
+BOOT        ORG     5000H
+            CALL    WHATVER
+            CP      1                   ; Model 1?
+            JR      NZ,IDENT3
+            LD      HL,LOADER1
+            JR      BOOT2
+IDENT3      CP      3                   ; Model 3?
+            JR      NZ,IDENT4
+            LD      HL,LOADER3
+            JR      BOOT2
+IDENT4      CP      4                   ; Model 4?
+            JR      NZ,IDUNKNOWN
+            LD      HL,LOADER4
+            JR      BOOT2
+IDUNKNOWN   RET                         ; Don't recognise the machine so
+                                        ; return to the ROM IPL
+
+; Absolute Boot Load Filenames
+
+LOADER1     DB      1,'BOOT1.SYS'
+            DW      4200H
+LOADER3     DB      1,'BOOT3.SYS'
+            DW      4200H
+LOADER4     DB      1,'BOOT4.SYS'            
+            DW      4200H
+
+BOOT2       LD      A, OPENFILE
+            OUT     (COMMAND2), A		; Open file
+            CALL    WAIT
+
+            LD      A,0AH               ; Open Flag + Filename
+            OUT     (SIZE2), A
+            LD      BC, 0AH << 8 | DATA2
+            OTIR
+            CALL    WAIT
+
+            IN      A,(STATUS)          ; Check if opened OK?
+            AND     01h                 ; TRS_HARD_ERR
+            JR      Z,BOOTLOAD          ; Opened OK so load absolute
+            RET                         ; Failed so return to ROM IPL
+
+BOOTLOAD    LD      E,(HL)              ; Destination address to DE for later use
+            INC     HL
+            LD      D,(HL)
+            PUSH    DE
+            POP     HL                  ; Destination address to HL for load
+            
+BOOTLOOP    LD      A,0                 ; Main Loop for Boot Loader
+            OUT    (SIZE2),A
+            LD      A,READFILE
+            OUT    (COMMAND2), A	    ; Read 256 bytes always
+            
+            CALL    WAIT
+            
+            IN      A, (STATUS)		    ; Check Status - DRQ set means we read something
+            AND     08h
+            JR      Z,DONE              ; DRQ clear so we are done
+            LD      BC, 00H << 8 | DATA2;
+            INIR
+            JR      BOOTLOOP            ; Keep reading until DRQ is clear
+            
+DONE        LD      A,CLOSEFILE         ; Tidy Up
+            OUT     (COMMAND2), A
+            POP     HL                  ; Remove the ROM IPL return address from
+                                        ; the stack as no longer required
+            EX      DE,HL               ; Get the retained BOOT?.SYS load address
+            JP      (HL)                ; and jump
+
+            INCLUDE TRSIDENT.Z80
+
+WAIT        EX      (SP),HL
+            EX      (SP),HL             ; small delay to settle the controller
+WAIT1       IN      A,(STATUS)
+            CP      0FFH                ; No interface on the bus
+            JR      Z,WAIT2             ; .. then drop out 
+            RLCA
+            JR      C,WAIT1
+WAIT2       RET
+            
+            END     BOOT
