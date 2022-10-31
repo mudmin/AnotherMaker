@@ -1,0 +1,32 @@
+The instructions in the readme.md are basically everything you need to know to build the card.
+I just want to add a few little bits of information for people who got kits from me.
+
+All chips have been tested.  The ROM has been pre-programmed, although if you have issues or have a
+V20 CPU in your PC, you can get a lot better performance if you re-flash the bios.
+
+The tall header is made to be cut into 2 pins and used as a "taller" header where the CF reader connects to
+the 3-in-1.  If you notice, the 40 pin header is taller than usual to allow room for the CF card to sit upside down
+without hitting the 3 in 1.
+See the https://github.com/mudmin/AnotherMaker/blob/master/tandy-3-in-1/IDE%20Adapter%20Modifications.pdf guide.
+
+When you follow that guide, the 2 pins that provide power to the CF reader are probably going to be too long.
+I recommend installing the cf reader, and then trimming those pins however much you need to trim it so everything
+sits level. It's a bit fiddly, but you'll get it. in the event it all goes wrong you can solder wire or the extra pins
+provided on that connector to make it all work. That's why they're there.
+
+This next part is VERY IMPORTANT.
+It is possible to fit the CF reader on but be misaligned.
+1. If your cf reader is pressed up against the serial port, you did it wrong.
+2. If there is not a gap between the shroud of the cf ide connector and the female connector on the 3in1, you did it wrong.
+3. If the power connector has to connect to the 2 pin female header at a steep angle, you did it wrong.
+4. If you put your card in the computer and the fan does not spin, you did it wrong.
+5. Finally if you flip the card over and test for continuity between the 2 power pins that connect to the CF card and it
+beeps, you did it wrong.
+
+If it's wrong, pull the cf reader back off and when it goes on right, you'll know.
+
+These cards have a lot of soldering and will take some time to build. I recommend building them, then going back through and
+checking every connection. If you have a short or goof something, the 74688 chips die in a hurry and you will get weird
+behavior later.
+
+When you plug the card in, you should immediately see 640k of ram and the bios for the cf reader should come up after that.
