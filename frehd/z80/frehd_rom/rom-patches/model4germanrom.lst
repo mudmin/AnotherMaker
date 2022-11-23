@@ -1,0 +1,215 @@
+ AS V1.42 Beta [Bld 87] - source file model4germanrom.asm - page 1 - 11/7/2013 14:02:26
+
+
+       1/       0 :                     
+       2/       0 :                     	CPU z80
+       3/       0 :                     
+       4/       0 :                     ;;;
+       5/       0 :                     ;;;
+       6/       0 :                     ;;; german rom
+       7/       0 :                     ;;;
+       8/       0 :                     ;;; 
+       9/       0 :                     
+      10/       0 :                     	BINCLUDE model4german.rom
+      11/    3801 :                     	INCLUDE ../frehd.inc
+(1)    1/    3801 :                     
+(1)    2/    3801 :                     ;;;
+(1)    3/    3801 :                     ;;; FreHD defines
+(1)    4/    3801 :                     ;;;
+(1)    5/    3801 :                     
+(1)    6/    3801 :                     ;; 
+(1)    7/    3801 :                     ;; ROM patches
+(1)    8/    3801 :                     ;;
+(1)    9/    3801 :                     
+(1)   10/    3801 :                     ;; where the extra "rom is loaded
+(1)   11/    3801 : =5000H              ROM_LOAD	equ 5000h
+(1)   12/    3801 :                     
+(1)   13/    3801 :                     ;; TRS model : passed by the patched rom
+(1)   14/    3801 : =1H                 ROM_MODEL_1	equ 1h
+(1)   15/    3801 : =3H                 ROM_MODEL_3	equ 3h
+(1)   16/    3801 : =4H                 ROM_MODEL_4	equ 4h
+(1)   17/    3801 : =4H                 ROM_MODEL_4A	equ 4h			; model 4 azerty
+(1)   18/    3801 : =5H                 ROM_MODEL_4P	equ 5h
+(1)   19/    3801 :                     
+(1)   20/    3801 :                     ;; 4P model 3 rom file
+(1)   21/    3801 : =MODELA.III         MODEL_III_FILE	equ "MODELA.III"
+(1)   22/    3801 :                     
+(1)   23/    3801 :                     ;; Rom passed parameter
+(1)   24/    3801 : =5001H              ROM_MODEL	equ ROM_LOAD+1
+(1)   25/    3801 :                     
+(1)   26/    3801 :                     ;; FreHD Interface defines
+(1)   27/    3801 : =CDH                CYLHI		equ 0CDh
+(1)   28/    3801 : =CCH                CYLLO		equ 0CCh
+(1)   29/    3801 : =CAH                SECCNT		equ 0CAh
+(1)   30/    3801 : =CBH                SECNUM		equ 0CBh
+(1)   31/    3801 : =C8H                DATA		equ 0C8h
+(1)   32/    3801 : =C9H                ERROR		equ 0C9h
+(1)   33/    3801 : =C1H                CONTROL		equ 0C1h
+(1)   34/    3801 : =CEH                SDH		equ 0CEh
+(1)   35/    3801 : =CFH                COMMAND		equ 0CFh		; write only
+(1)   36/    3801 : =CFH                STATUS		equ 0CFh		; read only
+(1)   37/    3801 : =C4H                COMMAND2	equ 0C4h		; write only
+(1)   38/    3801 : =C4H                READROM		equ 0C4h		; read only
+(1)   39/    3801 : =C5H                WRITEROM	equ 0C5h		; write only
+(1)   40/    3801 : =C2H                DATA2		equ 0C2h
+(1)   41/    3801 : =C3H                SIZE2		equ 0C3h
+(1)   42/    3801 : =C5H                ERROR2		equ 0C5h		; read only
+(1)   43/    3801 :                     ;; Interface commands
+(1)   44/    3801 : =1H                 GET_TIME	equ 01h
+(1)   45/    3801 : =3H                 OPEN_FILE	equ 03h
+(1)   46/    3801 : =4H                 READ_FILE	equ 04h
+(1)   47/    3801 : =6H                 CLOSE_FILE	equ 06h
+(1)   48/    3801 : =8H                 OPEN_DIR	equ 08h
+(1)   49/    3801 : =9H                 READ_DIR	equ 09h
+ AS V1.42 Beta [Bld 87] - source file model4germanrom.asm(frehd.inc) - page 2 - 11/7/2013 14:02:26
+
+
+(1)   50/    3801 : =AH                 MOUNT_DRIVE	equ 0Ah
+(1)   51/    3801 : =CH                 INFO_DRIVE	equ 0Ch
+(1)   52/    3801 : =EH                 READ_HEADER	equ 0Eh
+(1)   53/    3801 :                     ;; status bits
+(1)   54/    3801 : =80H                STATUS_BUSY	equ 80h
+(1)   55/    3801 : =40H                STATUS_READY	equ 40h
+(1)   56/    3801 : =20H                STATUS_WRERR	equ 20h
+(1)   57/    3801 : =10H                STATUS_SEEKDONE	equ 10h
+(1)   58/    3801 : =8H                 STATUS_DRQ	equ 08h
+(1)   59/    3801 : =4H                 STATUS_ECC	equ 04h
+(1)   60/    3801 : =2H                 STATUS_CIP	equ 02h
+(1)   61/    3801 : =1H                 STATUS_ERR	equ 01h
+(1)   62/    3801 :                     ;; get time parameter
+(1)   63/    3801 : =0H                 FREHD_SEC	equ 00h
+(1)   64/    3801 : =1H                 FREHD_MIN	equ 01h
+(1)   65/    3801 : =2H                 FREHD_HOUR	equ 02h
+(1)   66/    3801 : =3H                 FREHD_YEAR	equ 03h
+(1)   67/    3801 : =4H                 FREHD_DAY	equ 04h
+(1)   68/    3801 : =5H                 FREHD_MONTH	equ 05h
+(1)   69/    3801 :                     ;; file info (returned by READ_DIR)
+(1)   70/    3801 : =8H                 FIL_ATTRIB_OFFSET	equ 08h
+(1)   71/    3801 : =9H                 FIL_FNAME_OFFSET	equ 09h
+(1)   72/    3801 : =CH                 FIL_FNAME_LEN		equ 0ch		; 8.3
+(1)   73/    3801 :                     ;; drive info (returned by INFO_DRIVE)
+(1)   74/    3801 : =6H                 DRIVE_FNAME_OFFSET	equ 06h
+(1)   75/    3801 :                     ;; attrib bits
+(1)   76/    3801 : =1H                 FIL_ATTRIB_RO		equ 01h
+(1)   77/    3801 : =2H                 FIL_ATTRIB_HID		equ 02h
+(1)   78/    3801 : =4H                 FIL_ATTRIB_SYS		equ 04h
+(1)   79/    3801 : =8H                 FIL_ATTRIB_VOL		equ 08h
+(1)   80/    3801 : =10H                FIL_ATTRIB_DIR		equ 10h
+(1)   81/    3801 : =20H                FIL_ATTRIB_ARCHIVE	equ 20h
+(1)   82/    3801 :                     ;; open file options
+(1)   83/    3801 : =0H                 FA_OPEN_EXISTING equ 00h
+(1)   84/    3801 : =1H                 FA_READ          equ 01h
+(1)   85/    3801 : =2H                 FA_WRITE         equ 02h
+(1)   86/    3801 : =4H                 FA_CREATE_NEW    equ 04h
+(1)   87/    3801 : =8H                 FA_CREATE_ALWAYS equ 08h
+(1)   88/    3801 : =10H                FA_OPEN_ALWAYS   equ 10h
+(1)   89/    3801 :                     
+(1)   90/    3801 :                     
+(1)   91/    3801 :                     ;; Reed header  http://www.trs-80emulators.com/hdv1-format/
+(1)   92/    3801 :                     ;;
+(1)   93/    3801 :                     ;; byte 0-1
+(1)   94/    3801 : =56H                REED_MAGIC0	equ 56h
+(1)   95/    3801 : =CBH                REED_MAGIC1	equ 0cbh
+(1)   96/    3801 :                     ;; byte 8  : flag #2 -> bit 0 = auto-boot
+(1)   97/    3801 :                     ;; byte 11 : disk format.
+(1)   98/    3801 :                     ;;    0 = LDOS 6.3.1
+(1)   99/    3801 :                     ;;    1 = LDOS 5.3.1
+(1)  100/    3801 :                     ;;    2 = CPM
+(1)  101/    3801 :                     ;;
+(1)  102/    3801 : =8H                 REED_FLAG	equ 08h
+(1)  103/    3801 : =BH                 REED_OS		equ 0Bh
+(1)  104/    3801 : =0H                 OS_LDOS631	equ 0h
+(1)  105/    3801 : =1H                 OS_LDOS531	equ 1h
+(1)  106/    3801 : =2H                 OS_CPM		equ 2h
+(1)  107/    3801 : =3H                 OS_NEWDOS25	equ 3h
+(1)  108/    3801 : =4H                 OS_M1LDOS531	equ 4h
+(1)  109/    3801 : =5H                 OS_M1NEWDOS25	equ 5h
+ AS V1.42 Beta [Bld 87] - source file model4germanrom.asm(frehd.inc) - page 3 - 11/7/2013 14:02:26
+
+
+(1)  110/    3801 : =6H                 MAX_OS		equ 6h
+(1)  111/    3801 :                     
+(1)  112/    3801 :                     
+      12/    3801 :                     
+      13/    3801 :                     	
+      14/    3801 :                     
+ AS V1.42 Beta [Bld 87] - source file model4germanrom.asm - page 4 - 11/7/2013 14:02:26
+
+
+  symbol table (* = unused):
+  ------------------------
+
+*ARCHITECTURE :        k8-apple-osx - | *BIGENDIAN :                      0 - |
+*BRANCHEXT :                      0 - | *CASESENSITIVE :                  1 - |
+*CLOSE_FILE :                     6 - | *COMMAND :                       CF - |
+*COMMAND2 :                      C4 - | *CONSTPI :        3.141592653589793 - |
+*CONTROL :                       C1 - | *CYLHI :                         CD - |
+*CYLLO :                         CC - | *DATA :                          C8 - |
+*DATA2 :                         C2 - | *DATE :                   11/7/2013 - |
+*DRIVE_FNAME_OFFSET :             6 - | *ERROR :                         C9 - |
+*ERROR2 :                        C5 - | *FALSE :                          0 - |
+*FA_CREATE_ALWAYS :               8 - | *FA_CREATE_NEW :                  4 - |
+*FA_OPEN_ALWAYS :                10 - | *FA_OPEN_EXISTING :               0 - |
+*FA_READ :                        1 - | *FA_WRITE :                       2 - |
+*FIL_ATTRIB_ARCHIVE :            20 - | *FIL_ATTRIB_DIR :                10 - |
+*FIL_ATTRIB_HID :                 2 - | *FIL_ATTRIB_OFFSET :              8 - |
+*FIL_ATTRIB_RO :                  1 - | *FIL_ATTRIB_SYS :                 4 - |
+*FIL_ATTRIB_VOL :                 8 - | *FIL_FNAME_LEN :                  C - |
+*FIL_FNAME_OFFSET :               9 - | *FREHD_DAY :                      4 - |
+*FREHD_HOUR :                     2 - | *FREHD_MIN :                      1 - |
+*FREHD_MONTH :                    5 - | *FREHD_SEC :                      0 - |
+*FREHD_YEAR :                     3 - | *FULLPMMU :                       1 - |
+*GET_TIME :                       1 - | *HAS64 :                          1 - |
+*HASDSP :                         0 - | *HASFPU :                         0 - |
+*HASPMMU :                        0 - | *INEXTMODE :                      0 - |
+*INFO_DRIVE :                     C - | *INLWORDMODE :                    0 - |
+*INMAXMODE :                      0 - | *INSRCMODE :                      0 - |
+*INSUPMODE :                      0 - | *LISTON :                         1 - |
+*MACEXP :                         1 - | *MAX_OS :                         6 - |
+*MODEL_III_FILE :        MODELA.III - | *MOMCPU :                        80 - |
+*MOMCPUNAME :                   Z80 - | *MOUNT_DRIVE :                    A - |
+*NESTMAX :                      100 - | *OPEN_DIR :                       8 - |
+*OPEN_FILE :                      3 - | *OS_CPM :                         2 - |
+*OS_LDOS531 :                     1 - | *OS_LDOS631 :                     0 - |
+*OS_M1LDOS531 :                   4 - | *OS_M1NEWDOS25 :                  5 - |
+*OS_NEWDOS25 :                    3 - | *PACKING :                        0 - |
+*PADDING :                        1 - | *READROM :                       C4 - |
+*READ_DIR :                       9 - | *READ_FILE :                      4 - |
+*READ_HEADER :                    E - | *REED_FLAG :                      8 - |
+*REED_MAGIC0 :                   56 - | *REED_MAGIC1 :                   CB - |
+*REED_OS :                        B - | *RELAXED :                        0 - |
+ ROM_LOAD :                    5000 - | *ROM_MODEL :                   5001 - |
+*ROM_MODEL_1 :                    1 - | *ROM_MODEL_3 :                    3 - |
+*ROM_MODEL_4 :                    4 - | *ROM_MODEL_4A :                   4 - |
+*ROM_MODEL_4P :                   5 - | *SDH :                           CE - |
+*SECCNT :                        CA - | *SECNUM :                        CB - |
+*SIZE2 :                         C3 - | *STATUS :                        CF - |
+*STATUS_BUSY :                   80 - | *STATUS_CIP :                     2 - |
+*STATUS_DRQ :                     8 - | *STATUS_ECC :                     4 - |
+*STATUS_ERR :                     1 - | *STATUS_READY :                  40 - |
+*STATUS_SEEKDONE :               10 - | *STATUS_WRERR :                  20 - |
+*SVN_REV :                      DCF - | *TIME :                    14:02:26 - |
+*TRUE :                           1 - | *VERSION :                     142F - |
+*WRITEROM :                      C5 - |
+
+    103 symbols
+    102 unused symbols
+
+ AS V1.42 Beta [Bld 87] - source file model4germanrom.asm - page 5 - 11/7/2013 14:02:26
+
+
+  codepages:
+  ----------
+
+STANDARD (0 changed characters)
+
+ AS V1.42 Beta [Bld 87] - source file model4germanrom.asm - page 6 - 11/7/2013 14:02:26
+
+
+
+0.00 seconds assembly time
+
+    126 lines source file
+      1 pass
+      0 errors
+      0 warnings

@@ -1,0 +1,23 @@
+---------------------------------------------------------------------------
+NCDrill File Report For: wd1010_rel1.pcb   20-Apr-2013  10:46:38
+---------------------------------------------------------------------------
+
+
+
+Layer Pair : TopLayer to BottomLayer
+ASCII File : NCDrillOutput.TXT
+EIA File   : NCDrillOutput.DRL
+
+Tool         Hole Size          Hole Count Plated       Tool Travel
+---------------------------------------------------------------------------
+T1        0.56mm (22.047mil)       3                67.62 mm (2.66 Inch)
+T2        0.7mm (27.559mil)        159              869.45 mm (34.23 Inch)
+T3        0.9mm (35.433mil)        51               422.93 mm (16.65 Inch)
+T4        1mm (39.37mil)           12               138.04 mm (5.43 Inch)
+T5        1.1mm (43.307mil)        52               267.30 mm (10.52 Inch)
+T6        3.3mm (129.921mil)       4                294.49 mm (11.59 Inch)
+T7        1.3mm (51.181mil)        2         NPTH   66.73 mm (2.63 Inch)
+---------------------------------------------------------------------------
+Totals                             283              2126.56 mm (83.72 Inch)
+
+Total Processing Time : 00:00:00

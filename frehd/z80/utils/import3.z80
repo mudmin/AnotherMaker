@@ -1,0 +1,574 @@
+;; import3.z80
+
+; Assembler Control Flags
+
+CPM         EQU     0
+TRSDOS      EQU     1
+
+;; Model 1/3
+;; Model I/III addresses
+@fspec  	equ 441ch
+@init   	equ 4420h
+@open   	equ 4424h
+@close  	equ 4428h
+@read   	equ 4436h
+@write  	equ 4439h
+@error  	equ 4409h
+@exit   	equ 402dh
+@abort  	equ 4030h       
+@put		equ 001bh
+@high		equ 0000h	; XXX: FIX THIS
+@vdctl		equ 0000h	; XXX: FIX THIS
+@hexdec		equ 0000h	; XXX: FIX THIS
+dodcb$		equ 401dh
+
+;; Model 4 SVCs
+@svc		equ 40  	; rst address for SVCs
+@fspec6		equ 78
+@init6		equ 58
+@open6		equ 59
+@close6		equ 60
+@read6		equ 67
+@write6		equ 75
+@error6		equ 26
+@exit6		equ 22
+@abort6		equ 21
+@dsply6		equ 10
+@put6		equ 2
+@high6		equ 100
+@vdctl6		equ 15
+@hexdec6	equ 97
+
+;; Interface defines
+DATA2	  	equ 0c2h
+SIZE2     	equ 0c3h
+COMMAND2  	equ 0c4h
+ERROR2    	equ 0c5h
+STATUS    	equ 0cfh
+OPENFILE  	equ 03h
+READFILE  	equ 04h
+WRITEFILE 	equ 05h
+CLOSEFILE 	equ 06h
+
+;; FatFS flags
+FA_OPEN_EXISTING equ 00h
+FA_READ          equ 01h
+FA_WRITE         equ 02h
+FA_CREATE_NEW    equ 04h
+FA_CREATE_ALWAYS equ 08h
+FA_OPEN_ALWAYS   equ 10h
+
+;; Model 4 only: file init or open with wrong LRL.  Can be ignored.
+lrlerr  equ 42
+
+
+	org 5200h
+
+;; SVC tables
+startj:
+fspec:		call @fspec
+		ret
+init:		call @init
+		ret
+open:		call @open
+		ret
+close:		call @close
+		ret
+reed:		call @read
+		ret
+write:		call @write
+		ret
+error:		call @error
+		ret
+exit:		call @exit
+		ret
+abort:		call @abort
+		ret
+dsply:		call dsply5
+		ret
+put:		call @put
+		ret
+high:		call @high
+		ret
+vdctl:		call @vdctl
+		ret
+hexdec:		call @hexdec
+		ret
+setern:		call setern5
+		ret
+endj:
+
+
+startj6:
+		ld a, @fspec6
+		rst @svc
+		ret
+		ld a, @init6
+		rst @svc
+		ret
+		ld a, @open6
+		rst @svc
+		ret
+		ld a, @close6
+		rst @svc
+		ret
+		ld a, @read6
+		rst @svc
+		ret
+		ld a, @write6
+		rst @svc
+		ret
+		ld a, @error6
+		rst @svc
+		ret
+		ld a, @exit6
+		rst @svc
+		ret
+		ld a, @abort6
+		rst @svc
+		ret
+		ld a, @dsply6
+		rst @svc
+		ret
+		ld a, @put6
+		rst @svc
+		ret
+		ld a, @high6
+		rst @svc
+		ret
+		ld a, @vdctl6
+		rst @svc
+		ret
+		ld a, @hexdec6
+		rst @svc
+		ret
+		call setern6
+		ret		
+
+
+;; Nonzero for LDOS ern convention
+ernldos: 	db 1
+
+
+import:
+		push hl
+	
+		ld de, startj		; FIXME: hardcode LDOS 631 for now
+		ld hl, startj6
+		ld bc, endj-startj
+		ldir
+
+		ld hl, endimport	; buffer starts after us
+		inc h			; align to a 256-bytes boundary
+		ld l,0
+		ld (iobuf),hl
+
+		pop hl
+
+flag0:		ld a, (hl)		; look for flags
+		cp ' '
+		jp c, usage		; error if line ends here
+		jr nz, flag1
+		inc hl
+		jr flag0
+flag1:		cp '-'
+		jr nz, unix1
+		inc hl
+		ld a, (hl)
+flag3:		or 20h
+		cp 'e'
+		jr nz, flagn
+		sub a
+		ld (ernldos), a
+		jr flag2
+flagn:		cp 'n'
+		jr nz, usage		; unknown flag
+		ld a, 1
+		ld (nflag), a
+flag2:		inc hl
+		ld a, (hl)
+		cp ' '
+		jr nz, flag3		; another flag follows
+		inc hl
+		jr flag0
+
+unix1:		ld de, (iobuf)		; copy Unix filename
+		inc de
+		ld a, ' '
+unix2:		cp (hl)
+		ldi
+		jr c, unix2
+		dec de			; NUL terminate Unix name
+		ld a, 0
+		ld (de), a
+		jr z, doimport		; go if two names given
+
+	;; Translate last component of Unix name to TRS-80 name
+	
+		dec hl			; back up to terminator
+unix3:		dec hl			; back up to last byte of name
+		ld a, (hl)
+		cp '.'			; change '.' to '/'
+		jr nz, notdot
+		ld (hl), '/'
+notdot:		cp '/'
+		jr z, unix4
+		cp ' '
+		jr nz, unix3
+unix4:		inc hl			; point to start of modified last component
+		jp doimport
+
+	;; usage
+
+usage:  	ld hl,intro             ; what this is all about
+        	call dsply
+        	ld hl, usager           ; error message and exit
+        	call dsply
+        	jp abort
+
+	;; import !
+
+doimport:	ld de, dcb              ; ready to get TRS-80 filename from (HL)
+        	call fspec
+        	jr nz, usage
+
+		xor a			; ceof = 0
+		ld (ceof), a
+	
+		ld hl, (iobuf)		; Unix path
+		inc hl
+		ld b, 2			; length = 2 (flag + null-terminator)
+		ld a, 0			; null-terminator
+stlen1:		cp (hl)
+		jr z, stlen2
+		inc b			; found a character
+		inc hl
+		jr stlen1
+stlen2:		ld a, OPENFILE
+		out (COMMAND2), a	; send OPENFILE command
+		call wait
+		ld a, b
+		out (SIZE2), a		; send SIZE2
+		ld c, DATA2
+		ld hl, (iobuf)
+		ld (hl), FA_OPEN_EXISTING|FA_READ	; flags
+		otir
+		call wait
+		ld hl, fsize
+		in a, (SIZE2)		; size2 = 4 (file size as DWORD)
+		ld b, a
+		ld c, DATA2
+		inir
+
+	;; Calculate fsize in sectors
+		ld hl, (fsize+1)
+		ld a, (fsize)
+		or a
+		jr z, dsize0
+		inc hl
+dsize0:		ld (sectors), hl
+		call initprogress
+
+	;; Calculate the amount of available memory
+	
+		ld hl,0
+		ld b,l
+		call high
+		inc hl			; get highest full page
+		dec h
+		ld de, (iobuf)		; get buffer address
+		ld a,h
+		sub d
+		ld (bufsize), a		; mem can accommodate x sectors
+	
+openok:		ld hl, (iobuf)
+        	ld de, dcb
+        	ld b, 0
+        	call init               ; open the file
+		jr z, opn2ok
+		cp lrlerr
+		jr z, opn2ok
+		ld c, a
+        	call error
+        	jp abort
+
+	;; read the file from FreHD.
+	;; (iobuf)  : address of buffer
+	;;  bufsize : buffer size (in sector)
+	
+opn2ok:
+
+rloop:
+		ld hl, (iobuf)
+		ld (buf), hl		; buf = iobuf
+		ld bc, 0000h
+		ld (len), bc		; length = 0
+		ld a, (bufsize)
+		ld (cursize), a		; cursize = bufsize
+rloop1:
+		ld a, 0
+		out (SIZE2), a		; request 1 sector
+		ld a, READFILE
+		out (COMMAND2), a
+		call wait		; FreHD is reading
+		ld bc, 0000h
+		in a, (STATUS)		; get status. DRQ = we got something
+		and 08h
+		jr z, readdone		; got nothing
+		in a, (SIZE2)		; got something, get bytecount
+		ld c, a
+		or a
+		jr nz, readok		; not 0     => BC = number of bytes
+		ld b, 1			; 0 (= 256) => BC = 100
+readok:
+		ld hl, (len)		; len += BC
+		add hl, bc
+		ld (len), hl
+
+		ld b, c			; get the data from FreHD
+		ld c, DATA2
+		ld hl, (buf)		; into buf
+		inir
+		ld (buf), hl
+
+		ld a, (cursize)		; cursize--
+		dec a
+		jr z, readdone		; if (cursize == 0) then done
+		ld (cursize), a
+		jp rloop1		; else continue reading
+	
+readdone:
+		ld bc, (len)
+		ld a, c			; if BC == 00, nothing was read
+		or b			; and we are fully done
+		jr z, fulldone
+
+	;; write iobuf to TRS80 file
+	;; (iobuf) : address of buffer
+	;; BC : bytes to write
+
+		call translate		; translate new lines if flag -l set
+
+writebuf:
+		push bc			; save byte count
+		ld hl, (iobuf)
+		ld de, dcb
+		inc b			; deal with b=0 and/or c=0
+		ld a, c
+		and a
+		jr z, wstrt
+wloop:		ld (dcb+3), hl
+		call write		; write 256 bytes to file
+		jr z, wrok		; check for error
+		ld c, a
+		call error		; I/O error !
+		jp abort
+wrok:		inc h			; next!
+
+		push hl
+		ld hl, (sectors)	; sectors--
+		dec hl
+		ld (sectors), hl
+
+; uncomment if you want progress at every sector
+;		call progress		; display progress
+	
+		pop hl
+	
+wstrt:		djnz wloop
+		pop bc			; restore byte count
+		ld a, c
+		ld (ceof), a		; remember last chunk EOF offset
+
+	;; next chunk
+
+		call progress		; display progress	
+		jp rloop
+	
+	;; fulldone: we read the whole file from FreHD
+	
+fulldone:
+		ld a, CLOSEFILE		; tell FreHD to close the file
+		out (COMMAND2), a
+		call wait
+
+		ld a, (ceof)
+		ld (dcb+8), a
+		call setern		; set ERN (in case shortening file)
+		ld de, dcb
+		call close		; close the TRS80 file
+		jr z, closeok
+		ld c, a
+		call error		; I/O error when closing
+
+closeok:
+		ld c, 0dh
+		call put
+		ld hl, donestr
+		call dsply
+		ld hl, 0
+		jp exit
+
+
+;;
+;; translate buffer in (iobuf), len = BC
+;;
+translate:
+		ld a, (nflag)
+		and a
+		jr nz, translate1
+		ret
+translate1:	
+		ld hl, (iobuf)
+		push bc			; save bytecount
+		ld a, 0ah
+		ld d, 0dh
+		inc c			; deal with b=0 and/or c=0
+		inc b
+		jr tstrt
+tloop:		cp (hl)
+		jr nz, notcr
+		ld (hl),d
+notcr:		inc hl
+tstrt:		dec c
+		jr nz, tloop
+		djnz tloop
+		pop bc			; restore bytecount
+		ret
+
+
+;; 
+;; display file size
+;;
+showsize:
+		ld hl, (fsize+1)	; convert fsize to num of sectors
+		ld a, (fsize)
+		or a
+		jr z, showsize2
+		inc hl
+showsize2:	ld de, sizestr2
+		call hexdec
+		ld hl, sizestr
+		call dsply
+		ret
+
+;; 
+;; display progress
+;;
+initprogress:
+		ld hl, sizestr
+		call dsply
+		ld b, 4h		; get cursor position
+		call vdctl
+		ld (cpos), hl		; save cursor position
+		ld hl, (sectors)
+		ld de, sizestr2
+		call hexdec
+		ld hl, sizestr2
+		call dsply
+		ret
+	
+progress:
+		push bc
+		push de
+		ld hl, 0
+cpos		equ $-2
+		ld b, 3h		; set cursor position
+		call vdctl
+progress2:	ld de, sizestr2
+		ld hl, (sectors)
+		call hexdec
+		ld hl, sizestr2
+		call dsply
+		pop de
+		pop bc
+		ret			; (HL is trashed)
+	
+
+;; Display message in HL.  03h terminate, 0dh newline and terminate.
+dsply5:		ld de, dodcb$
+		push hl
+dsply0:		ld a, (hl)
+		cp 03h
+		jr z, dsply1
+		push af
+		call put
+		pop af
+		inc hl
+		cp 0dh
+		jr nz, dsply0
+dsply1:		pop hl
+		ret
+
+
+;;; wait until the interface is ready
+wait:		ex (sp),hl
+		ex (sp),hl			; small delay to settle the controller
+wait1:		in a, (STATUS)
+		rlca
+		jr c, wait1
+		in a, (STATUS)			; read status again
+		and 01h				; nz = error
+		jr z, wait2
+		call uerror
+		jp abort
+wait2:		ret
+
+
+;; EOF handling differs between TRS-80 DOSes:
+;;  For TRSDOS 2.3 and LDOS, word (dcb+12) contains the number of
+;;  256 byte records in the file, byte (dcb+8) contains the EOF
+;;  offset in the last record (0=256).
+;;  For NEWDOS/80 and TRSDOS 1.3, byte (dcb+8) and word (dcb+12)
+;;  form a 24 bit number containing the relative byte address of EOF.
+;;  Thus (dcb+12) differs by one if the file length is not a
+;;  multiple of 256 bytes.  DOSPLUS also uses this convention,
+;;  and NEWDOS 2.1 probably does too (not checked).
+
+; Set ending record number of file to current position
+; EOF offset in C; destroys A, HL
+setern5:
+		ld hl, (dcb+10)		; current record number
+		ld a, (ernldos)         ; get ERN convention
+		or a
+		jr nz, noadj            ; go if TRSDOS 2.3/LDOS convention
+adj:		or c			; length multiple of 256 bytes?
+		jr z, noadj             ; go if so
+		dec hl			; no, # of records - 1
+noadj:		ld (dcb+12), hl
+		ret
+
+;; All Model 4 mode operating systems should be TRSDOS/LS-DOS 6.x compatible
+setern6:
+		ld hl, (dcb+10)
+		ld (dcb+12), hl
+		ret
+
+;; FatFS error message and handler
+	
+	include fatfserr.z80
+	
+;; Local variables
+
+nflag:		defb 0
+fsize:		defs 4
+sectors:	defw 0
+iobuf:		defw 0
+buf:		defw 0
+len:		defw 0
+bufsize:	defb 0
+cursize:	defb 0
+ceof:		defb 0
+dcb:		defs 48		; 48 for Model III TRSDOS 1.3
+
+
+intro:		defb 'IMPORT3 '
+		INCLUDE VERSION.Z80
+		defb ' - Import from SD for the FreHD Hard Drive Emulator', 0dh
+usager: 	defb 'Usage: IMPORT3 [-ne] sdfile [tofile]', 0dh
+sizestr:	defb 'Importing ', 03h
+sizestr2:	defb '..... sectors', 03h
+donestr:	defb 'Completed!', 0dh
+	
+endimport:
+        end import

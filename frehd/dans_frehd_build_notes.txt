@@ -1,0 +1,44 @@
+If you got a kit from me, all chips have been tested.
+The PIC and GAL chips have been preprogrammed.
+
+This file https://github.com/mudmin/AnotherMaker/blob/master/frehd/bom/REAL%20Part%20locations.txt
+will tell you the proper locations to install your parts.
+
+There are a few minor modifications. As you can see in this picture
+https://github.com/mudmin/AnotherMaker/blob/master/frehd/frehd-pcb-mod.png
+
+Q1 is not populated.  Instead a wire is soldered between the 2 pins as shown.
+R15 is not populated. I filled in the extra holes with solder for clarity.
+
+Be careful you don't bridge any pins when soldering the SD card reader.
+Also be sure to solder the tabs on the sides as well as the corners and rear of the reader.
+
+The LEDs are solderd with the short leg of the LED towards the snubbed off part of the circle on the led footprint
+
+The electrolytic capacitors will mess with your brain a little bit, so be careful.  The PCB is marked with a
++ while caps are usually marked on the -.  So the line always goes AWAY from the +
+
+Be careful when inserting chips that you don't curl the end legs underneath back up into the chip.
+
+Before attaching the FreHD to the computer, power it with 5v separately (I usually splice a usb cord for the 5v);
+The green LED should flash briefly when plugging it in (or within a few seconds) to let you know that all is
+relatively well.
+
+Many aftermarket power supplies come with a place to power the Frehd, but you can also splice into the lines that power
+the floppy drives or run an external USB connector.
+
+When you are installing the ribbon cable, the ones I made are designed so the red stripe faces the right when looking from
+front of the computer.  Get it.  RED = RIGHT.
+
+I like to feed the cable up between the motherboard and the shield for maximum neatness if I'm doing an internal install.
+The process is documented here: https://drive.google.com/file/d/1-nj3amBGVz4PZ3ahkUwwwScRwPQDO_K4/view
+
+If you 3d print an enclosure, I recommend installing it in the top drive bay.
+This enclosure is great for taking up a full bay https://www.thingiverse.com/thing:4169736
+
+If you want to install a Gotek as well, this one is half Gotek and half FreHD. https://www.thingiverse.com/thing:4731543
+
+Booting.  In the beginning, you will need a boot disk and an SD card in your FreHD.  I'm not an expert on these things,
+but I can get you started.  My personal preference is to use a Gotek for the boot disk.
+You can find boot disk images here https://github.com/TJBChris/FreHDDisk/tree/main/disk_images
+Many downloads can be found here http://members.iinet.net.au/~ianmav/trs80/downloads.htm

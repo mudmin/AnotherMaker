@@ -1,0 +1,58 @@
+Bill Of Material For wd1010_rel1.pcb
+On 20-Apr-2013 at 10:46:42
+
+ Comment             Pattern     Quantity  Components
+------------------------------------------------------------------------------
+
+
+ 100n                RAD-0.2          3    C1, C4, C9
+
+ 10MHz               RAD0.2           1    Y1
+
+ 10k                 AXI-0.4          5    R2, R4, R5, R12, R15 (Do not install R15)
+
+ 10u                 RB.1             2    C5, C12
+
+ 1k                  AXI-0.4          2    R1, R3
+
+ 1uF                 RB.1             5    C6, C7, C8, C10, C11
+
+ 220                 AXI-0.4          3    R7, R9, R10
+
+ 22p                 RAD-0.2          2    C2, C3
+
+ 3.3V                CR2032           1    BAT1
+
+ 32.768kHz           RAD-0.1          1    Y2
+
+ 330                 AXI-0.4          5    R6, R8, R11, R13, R14
+
+ 4k7                 AXI-0.4          3    R16, R17, R18
+
+ 74HC595             DIP16F           1    U6
+
+ 74HCT245            DIP20F           1    U3
+
+ BS170 (DO NOT USE)  TO92-BS170       1    Q1
+
+ CON2                SIP2             1    J4
+
+ CON5                SIP5F            1    J5
+
+ CON5                SIP5FS           1    J1
+
+ CON50               IDC50F           1    J3
+
+ DS1307              DIP8F            1    U7
+
+ GAL16V8             DIP20F           1    U2
+
+ LED                 LEDFRED          2    D1, D2
+
+ LP2950-3.3          TO92-LP2950      1    U4
+
+ MAX232              DIP16F           1    U5
+
+ PIC18F4620          DIP40F           1    U1
+
+ SDCARD              SDCARD1          1    J2

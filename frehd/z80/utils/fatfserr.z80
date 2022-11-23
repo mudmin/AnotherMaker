@@ -1,0 +1,46 @@
+UERROR:     LD      HL, error_m		; display error prefix
+            CALL    DSPLY
+            IN      A, (ERROR2)		; get error number
+            CP      15h			; check error number.
+            JR      C, UERROK
+            SUB     A			; A=0 unknown error 
+UERROK:     LD      L, A
+            LD      H, 00h
+            ADD     HL, HL		; pointers are 2 bytes
+            LD      DE, error_table
+            ADD     HL, DE		; hl points to the pointer
+            LD      A, (HL)
+            INC     HL
+            LD      H, (HL)
+            LD      L, A			; hl points to the string
+            CALL    DSPLY
+            RET
+
+error_m: defb 'Error: ', 03h
+fr_unknown: defb 'Unknown error', 0dh			; 0
+fr_disk_err: defb 'Disk error', 0dh			; 1
+fr_int_err: defb 'Internal error', 0dh			; 2
+fr_not_ready: defb 'Drive not ready', 0dh 		; 3
+fr_no_file: defb 'File not found', 0dh	  		; 4
+fr_no_path: defb 'Path not found', 0dh	  		; 5
+fr_invalid_name: defb 'Invalid pathname', 0dh		; 6
+fr_denied: defb 'Access denied', 0dh			; 7
+fr_exist: defb 'File exists', 0dh			; 8
+fr_invalid_obj:	defb 'File/dir object invalid', 0dh	; 9
+fr_write_protected: defb 'Write protected', 0dh		; 10
+fr_invalid_drive: defb 'Invalid drive', 0dh		; 11
+fr_not_enabled:	defb 'Volume not mounted', 0dh		; 12
+fr_no_fs: defb 'No FAT fs found', 0dh			; 13
+fr_mkfs_aborted: defb 'mkfs aborted', 0dh		; 14
+fr_timeout: defb 'Timeout detected', 0dh		; 15
+fr_locked: defb 'File locked', 0dh			; 16
+fr_not_enough_core: defb 'Not enough core', 0dh		; 17
+fr_too_many_open_files:	defb 'Too many open files', 0dh ; 18
+fr_invalid_param: defb 'Invalid parameter', 0dh		; 19
+fr_disk_full: defb 'Disk full', 0dh			; 20
+error_table: defw fr_unknown ,fr_disk_err, fr_int_err, fr_not_ready, fr_no_file
+	defw fr_no_path, fr_invalid_name, fr_denied, fr_exist, fr_invalid_obj
+	defw fr_write_protected, fr_invalid_drive, fr_not_enabled
+	defw fr_no_fs, fr_mkfs_aborted, fr_timeout, fr_locked
+	defw fr_not_enough_core, fr_too_many_open_files, fr_invalid_param
+	defw fr_disk_full	

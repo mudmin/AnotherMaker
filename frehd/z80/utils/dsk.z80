@@ -1,0 +1,854 @@
+;*=*=*
+;	dsk/dct
+;	
+;	LDOS driver to mount JV1/JV3/DMK files from FreHD
+;
+;	Copyright (c) 2013, Frederic Vecoven
+;	Inspired from Tim Mann's xtrshard.z80 driver
+;	Many thanks to Tim for answering some of my questions!
+;	
+;*=*=*
+
+; Assembler Control Flags
+
+CPM         EQU     0
+TRSDOS      EQU     1
+
+;*=*=*
+;	defines
+;*=*=*
+LF	equ	10
+CR	equ	13
+ETX	equ	3
+
+;*=*=*
+;	FreHD defines
+;*=*=*
+DATA2	  	equ 0c2h
+SIZE2     	equ 0c3h
+COMMAND2  	equ 0c4h
+ERROR2    	equ 0c5h
+STATUS    	equ 0cfh
+
+GETVER		equ 00h
+IMFILE		equ 0dh
+IM_OPEN		equ 00h
+IM_READSEC	equ 01h
+	
+FA_OPEN_EXISTING equ 00h
+FA_READ          equ 01h
+FA_WRITE         equ 02h
+FA_CREATE_NEW    equ 04h
+FA_CREATE_ALWAYS equ 08h
+FA_OPEN_ALWAYS   equ 10h
+
+
+;*=*=*
+;	Model 4 SVC
+;*=*=*
+@dsply		equ 10
+@flags		equ 101
+@gtdct		equ 81
+@gtmod		equ 83
+@gtdcb		equ 82
+@high		equ 100
+@logot		equ 12
+@ckbrkc		equ 106
+@keyin		equ 9
+;*=*=*
+;	Model I/3 hard address
+;*=*=*
+m3flag$		equ	0125h
+@logot1		equ	447bh
+@logot3		equ	428ah
+@dsply1		equ	4467h
+@dsply3		equ	4467h
+@keyin1		equ	0040h
+@keyin3		equ	0040h
+high$1		equ	4049h
+high$3		equ	4411h
+cflag$1 	equ     4758h
+cflag$3 	equ     4758h
+dct0$3		equ	4700h
+dct0$1		equ	4700h
+dctlen		equ	10
+
+
+;*=*=*
+;	Set origin to be safe on LDOS 5 and 6
+;*=*=*
+	org	6000h
+
+;*=*=*
+;	Find which DOS is running (XXX: hardcoded LDOS6 for now)
+;*=*=*
+instal	ld	(dct),de		; save DCT address
+	ld	a,(000ah)		; find TRS80 model
+	cp	40h
+	jp	nz,ldos6		; model 4 !
+	ld	a,(m3flag$)
+	cp	'I'
+	jp	z,model3
+
+;*=*=*
+;	LDOS 5 Model I
+;*=*=*
+model1	ld	a,0cdh			; insert @dsply1
+	ld	(dsply),a
+	ld	hl,@dsply1
+	ld	(dsply+1),hl
+	ld	a,0cdh			; insert model I @logot
+	ld	(logot),a
+	ld	hl,@logot1
+	ld	(logot+1),hl
+	ld	hl,s_hello		; welcome message
+	call	dsply
+	ld	a,(cflag$1)
+	bit	3,a			; system request ?
+	jp	z,viaset
+	ld	de,(dct)
+	ld	a,d
+	or	e			; DRIVE= must be specified
+	jp	z,needdr
+	call	tfrehd			; FreHD present ?
+	jp	nz,nofrehd
+	call	tfrehd2			; Version 2.09 or above?
+	jp	c,ofrehd
+
+asku1	ld	hl,s_fname		; ask filename
+	call	dsply
+	ld	hl,fname
+	ld	bc,0c00h
+	call	@keyin1
+	jp	c,hitbrk
+	jp	nz,hitbrk
+	ld	a,b
+	ld	(flen),a
+
+	ld	hl,dct0$1		; DCT0 is at this address
+	ld	(dct0),hl
+
+	ld	hl,(high$1)
+	call	xgtmod			; module already loaded ?
+	jp	z,setdct
+	ld	hl,(high$1)
+	ld	(newend),hl
+	ld	de,length
+	sub	a
+	sbc	hl,de
+	ld	(high$1),hl
+	call	relo
+	jp	move
+
+;*=*=*
+;	LDOS 5 Model III
+;*=*=*
+model3	ld	a,0cdh			; insert @dsply3
+	ld	(dsply),a
+	ld	hl,@dsply3
+	ld	(dsply+1),hl
+	ld	a,0cdh			; insert model III @logot
+	ld	(logot),a
+	ld	hl,@logot3
+	ld	(logot+1),hl
+	ld	hl,s_hello		; welcome message
+	call	dsply
+	ld	a,(cflag$3)
+	bit	3,a			; system request ?
+	jp	z,viaset
+	ld	de,(dct)
+	ld	a,d
+	or	e			; DRIVE= must be specified
+	jp	z,needdr
+	call	tfrehd			; FreHD present ?
+	jp	nz,nofrehd
+	call	tfrehd2			; Version 2.09 or above ?
+	jp	c,ofrehd
+
+asku3	ld	hl,s_fname		; ask filename
+	call	dsply
+	ld	hl,fname
+	ld	bc,0c00h
+	call	@keyin3
+	jp	c,hitbrk
+	jp	nz,hitbrk
+	ld	a,b
+	ld	(flen),a
+
+	ld	hl,dct0$3		; DCT0 is at this address
+	ld	(dct0),hl
+
+	ld	hl,(high$3)
+	call	xgtmod			; module already loaded ?
+	jp	z,setdct
+	ld	hl,(high$3)
+	ld	(newend),hl
+	ld	de,length
+	sub	a
+	sbc	hl,de
+	ld	(high$3),hl
+	call	relo
+	jp	move
+	
+;*=*=*
+;	LS-DOS 6
+;*=*=*
+ldos6	ld	hl,s_hello		; welcome message
+	call	dsply
+	ld	a,@flags		; get flags pointer into IY
+	rst	40
+	ld	a,(iy+'C'-'A')		; get CFLAGS$
+	bit	3,a			; system request ?
+	jp	z,viaset
+	ld	de,(dct)
+	ld	a,d			; DRIVE= must be specified
+	or	e			; (if so, DE != 0)
+	jp	z,needdr
+	call	tfrehd			; FreHD present ?
+	jp	nz,nofrehd
+	call	tfrehd2			; Version 2.09 or above ?
+	jp	c,ofrehd
+
+asku4	ld	hl,s_fname		; ask filename
+	call	dsply
+	ld	hl,fname
+	ld	bc,0c00h
+	ld	a,@keyin
+	rst	40
+	jp	c,hitbrk
+	jp	nz,hitbrk
+	ld	a,b
+	ld	(flen),a
+
+	push	iy			; save IY
+	ld	c,0			; get pointer to DCT 0
+	ld	a,@gtdct
+	rst	40
+	push	iy			; result in IY
+	pop	de			; DE = IY
+	ld	(dct0),de
+	pop	iy			; restore IY
+;*=*=*
+;	check if driver is already loaded
+;*=*=*
+	ld	de,modnam
+	ld	a,@gtmod
+	rst	40
+	jp	z,setdct		; already loaded, skip loading
+;*=*=*
+;	Obtain low memory driver pointer
+;*=*=*
+	ld	e,'K'			; locate pointer to *KI DCB
+	ld	d,'I'			;   via @GTDCB SVC
+	ld	a,@gtdcb
+	rst	40
+	jp	nz,curdl		; no error unless KI clobbered
+	dec	hl			; decrement to driver pointer
+	ld	d,(hl)
+	dec	hl
+	ld	e,(hl)
+;*=*=*
+;	Check if driver will fit in [(LCPTR), 12FFh]
+;*=*=*
+	push	hl			; save address of pointer
+	ld	hl,length		; new pointer will be
+	add	hl,de			;   pointer + length
+	ld	d,h			; save copy in DE
+	ld	e,l
+	ld	bc,1301h		; if > 1300h, driver won't fit
+	sub	a			; reset carry
+	sbc	hl,bc
+	pop	hl			; restore address of pointer
+	jr	nc,usehi		; go if driver won't fit
+	ld	(hl),e			; store new value of pointer
+	inc	hl
+	ld	(hl),d
+	dec	de
+	ld	(newend),de		; last byte of driver goes here
+	jr	dorelo
+;*=*=*
+;	Use high memory, if possible
+;*=*=*
+usehi	ld	hl,0			; get current HIGH$
+	ld	b,l
+	ld	a,@high
+	rst	40
+	jp	nz,nomem
+	ld	(newend),hl		; last byte of driver goes here
+	ld	de,length
+	sub	a			; reset carry
+	sbc	hl,de			; compute new high
+	push	hl
+	ld	a,@high
+	rst	40
+	ld	hl,s_himem		; show 'high mem' notice
+	call	dsply
+	pop	hl
+;*=*=*
+;	Relocate internal references in driver
+;	HL = address for last byte of driver
+;*=*=*
+dorelo	call	relo
+;*=*=*
+;	Move driver into low or high memory
+;*=*=*
+move	ld	de,(newend)		; destination address
+	ld	hl,dvrend		; last byte of module
+	ld	bc,length		; length of driver
+	lddr
+	ex	de,hl
+	inc	hl			; bump to driver entry
+;*=*=*
+;	Open image, and if success, setup DCT
+;*=*=*
+setdct
+	ld	(drv),hl		; save driver address in drv
+	call	imopen			; try to open image
+	jr	nz,ferror
+;*=*=*
+;	bytes 0-2 : C3/C9 + DCT vector
+;*=*=*
+	ld	iy,(dct)
+	ld	hl,(drv)
+	ld	(iy+1),l		; driver address
+	ld	(iy+2),h
+;*=*=*
+;	byte 6 : MAXCYL
+;*=*=*
+	ld	hl,fname		; image info buffer
+	ld	a,(hl)			; info[0] = number of tracks
+	ld	(iy+6),a
+;*=*=*
+;	byte 4 : DCT FLAG-2
+;
+;	bit 7    : 1=no @CKDRV when @OPEN
+;	bit 6    : 1=double-density compatible
+;	bit 5    : 1=two-side 0=one-side
+;	bit 4    : 1=alien
+;	bits 3-0 : floppy physical address
+;*=*=*
+	ld	a,(unit)
+	or	0F0h
+	ld	(iy+4),a
+	inc	hl
+	ld	a,(hl)			; info[1] = single side
+	or	a
+	jr	z,dbyt3
+	res	5,(iy+4)
+;*=*=*
+;	byte 3 : DCT FLAG-1
+;
+;	bit 7    : 1=software write protect
+;	bit 6    : 1=double density  0=single density
+;	bit 5    : 1=8" drive  0=5.25"
+;	bit 4    : side-select
+;	bit 3    : 1=hard drive  0=floppy
+;	bit 2    : delay, 1=0.5s  0=1.0s
+;	bits 1-0 : step rate
+;
+;	byte 7 : configuration field 1
+;
+;	bits 7-5 : 000 for floppy
+;	bits 4-0 : sector per track (0 means 1, so 32 is 1Fh)
+;
+;	byte 8 : configuration field 2
+;
+;	bits 7-5 : quantity of granules per track (SD:2 DD:3)
+;	bits 4-0 : quantity of sectors per granule (SD:5 DD:6)
+;*=*=*
+dbyt3	ld	(iy+3),11000100b
+	inc	hl
+	ld	bc,4511h		; DDEN allocation
+	ld	a,(hl)			; info[2] = single density
+	or	a
+	jr	z,notsden
+	res	6,(iy+3)
+	ld	bc,2409h		; SDEN allocation
+notsden	ld	(iy+7),c
+	ld	(iy+8),b
+	inc	hl
+	ld	a,(hl)			; info[3] = write protect
+	or	a
+	jr	nz,dbyt5
+	res	7,(iy+3)
+;*=*=*
+;	byte 5: CURCYL
+;*=*=*
+dbyt5	ld	a,(unitmask)
+	ld	(iy+5),a		; => used as "file descriptor"
+;*=*=*
+;	byte 8 : DIRCYL
+;*=*=*
+	ld	(iy+9),0
+;*=*=*
+;	display success
+;*=*=*
+	inc	hl
+	ld	a,(hl)			; info[4] = image type
+	cp	3+1
+	jr	c,ds1			; if > 3 then
+	xor	a			;   use 0
+ds1	ld	b,0
+	ld	de,s_mounted
+	ld	hl,s_types
+	add	a,a
+	add	a,a
+	ld	c,a
+	add	hl,bc
+	ld	c,4
+	ldir
+	ld	hl,s_mounted
+	call	dsply
+
+	xor	a
+	ld	hl,0			; return success
+	ret
+
+;*=*=*
+;	display message
+;*=*=*
+ferror	ld	hl,s_ferror
+	db	0ddh
+curdl	ld	hl,s_curdl
+	db	0ddh
+needdr	ld	hl,s_needdr
+	db	0ddh
+nofrehd	ld	hl,s_nofrehd
+	db	0ddh
+ofrehd	ld	hl,s_ofrehd
+	db	0ddh
+nomem	ld	hl,s_nomem
+	db	0ddh
+viaset	ld	hl,s_viaset
+	db	0ddh
+hitbrk	ld	hl,s_hitbrk
+logot:	ld	a,@logot
+	rst	40
+	ld	hl,-1			; set error
+	ret
+
+;*=*=*
+;	Relocate internal references in driver
+;	HL = address for last byte of driver
+;*=*=*
+relo	ld	hl,(newend)
+	ld	iy,reltab		; relocation table
+	ld	de,dvrend
+	sub	a			; clear carry
+	sbc	hl,de
+	ld	b,h			; move to BC
+	ld	c,l
+rloop	ld	l,(iy)			; get address to change
+	ld	h,(iy+1)
+	ld	a,h
+	or	l			; done if 0
+	ret	z
+	ld	e,(hl)			; get address
+	inc	hl
+	ld	d,(hl)
+	ex	de,hl			; offset it
+	add	hl,bc
+	ex	de,hl
+	ld	(hl),d			; and store it
+	dec	hl
+	ld	(hl),e
+	inc	iy
+	inc	iy
+	jr	rloop			; loop
+
+;*=*=*
+; Search for existing copy of driver.
+; Rough Model I/III emulation of Model 4 @GTMOD, hardcoded with driver address.
+;
+; Entry: HL holds HIGH$
+; Exit Z: HL holds driver address
+;         NZ: driver not found
+;*=*=*
+xgtmod	inc	hl
+	ld	a,h
+	or	l
+	jr	nz,xgtm1
+	dec	a		;not found
+	ret
+xgtm1	ld	a,(hl)
+	cp	18h		;unconditional jr?
+	ret	nz		;not a module header
+	push	hl		;save start address
+	inc	hl		;skip jr
+	inc	hl		;skip offset
+	inc	hl		;skip start address
+	inc	hl
+	ld	a,(hl)		;compare name length
+	cp	modptr-modnam
+	jr	nz,nextmd	;different - skip
+	ld	b,a		;compare name
+	ld	de,modnam
+	inc	hl
+xgtm2	ld	a,(de)
+	cp	(hl)
+	jr	nz,nextmd	;different - skip
+	inc	de
+	inc	hl
+	djnz	xgtm2
+	pop	hl		;same - found
+	ret
+nextmd	pop	hl		;get back start of module
+	inc	hl
+	inc	hl
+	ld	e,(hl)		;pointer to last byte
+	inc	hl
+	ld	d,(hl)
+	ex	de,hl
+	jr	xgtmod
+
+;*=*=*
+;	Message and globals
+;*=*=*
+s_hello		db	'JV1/JV3/DMK driver for FreHD - '
+	include version.z80
+		db	LF,CR
+s_nofrehd	db	'FreHD interface not found!',CR
+s_ofrehd	db	'FreHD version must be >= 2.09',CR
+s_ferror	db	'Failed!',CR
+s_mounted	db	'... image mounted!',CR
+s_fname		db	'Enter image filename: ',ETX
+s_viaset	db	'Must install via SYSTEM (DRIVE=,DRIVER=)',CR
+s_nomem		db	'High memory is not available!',CR
+s_himem		db	'Notice: driver installed in high memory',CR
+s_curdl		db	'LS-DOS is curdled!',CR
+s_needdr	db	'DRIVE= must be specified!',CR
+s_hitbrk	db	'Aborted!',CR
+s_types		db	'??? ','DMK ','JV3 ','JV1 '
+
+masks		db	01h, 02h, 04h, 08h, 10h, 20h, 40h, 80h
+dct		dw	0
+dct0		dw	0
+drv		dw	0
+newend		dw	0
+unitmask	db	0
+unit		db	0		; unit  \
+flen		db	0		; flen   | must remain together
+fname		ds	13		; fname /
+
+
+;*=*=*
+;	Open file on FreHD
+;	drv   : adress of driver
+;	fname : filename
+;*=*=*
+imopen	ld	bc,0800h
+	ld	hl,(dct0)
+uloop	push	hl			; save pointer to DCT[i]
+	inc	hl			; skip c3/c9
+	ld	a,(drv)
+	xor	(hl)
+	jr	nz,unext		; not us
+	inc	hl
+	ld	a,(drv+1)
+	xor	(hl)
+	jr	nz,unext		; not us
+	inc	hl			; we are installed in this DCT !
+	inc	hl
+	inc	hl
+	ld	a,c
+	or	(hl)			; CURCYL is used as file descriptor bitmask
+	ld	c,a
+unext	pop	hl			; restore pointer to DCT[i]
+	ld	de,dctlen
+	add	hl,de
+	djnz	uloop			; loop 8x
+
+	ld	a,c			; get bitmask of used file descriptors
+	cp	0FFh			; all used ?
+	jr	nz,ufind		; no
+	ld	a,(iy+5)		; yes. Re-use the one of this DCT
+	cpl				; (cpl will set all bits to '1' except one)
+ufind	ld	b,7			; find first '0' bit from MSB
+ufind1	rla				; get bit 7 in C
+	jr	nc,ufind2
+	djnz	ufind1
+ufind2	ld	a,b
+	ld	(unit),a
+
+	ld	hl,masks		; get 1 << A from lookup table
+	ld	b,0
+	ld	c,a
+	add	hl,bc
+	ld	a,(hl)
+	ld	(unitmask),a
+
+imopen2	ld	a,(flen)		; filename length
+	add	a,3			; + unit, subcmd and null terminator
+	ld	b,a
+	call	sendmk
+	dec	b			; null terminator is outside 'otir'
+	ld	hl,flen
+	ld	(hl),IM_OPEN		; IM_OPEN
+	dec	hl			; point to 'unit'
+	ld	c,DATA2
+	otir
+	xor	a
+	out	(DATA2),a		; -> null terminator
+	call	wait
+	in	a,(ERROR2)
+	or	a
+	ret	nz			; return if error
+
+	ld	hl,fname		; use fname buffer for image info
+	ld	bc,5<<8|DATA2
+	inir
+	xor	a			; set Z
+	ret
+
+;*=*=*
+;	Test if FreHD is present
+;*=*=*
+tfrehd	ld	a,GETVER
+	out	(COMMAND2),a
+	call	wait
+	in	a,(SIZE2)
+	cp	6
+	ret
+
+;*=*=*
+;	Testif FreHD is at least 2.09 (must be called after tfrehd)
+;*=*=*
+tfrehd2	in	a,(DATA2)
+	cp	2
+	ret	c
+	ret	nz
+	in	a,(DATA2)
+	cp	9
+	ret
+
+;*=*=*
+;	Diplay routine for all models
+;*=*=*
+
+dsply	ld	a,@dsply
+	rst	40
+	ret
+
+;*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+;	DRIVER
+;*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*	
+entry	jr	begin			; DOS driver header
+	dw	dvrend
+rx00	equ	$-2
+	db	modptr-modnam		; length of name
+modnam	db	'dmk'			; name for @GTMOD
+modptr	dw	0
+	dw	0
+
+begin	push	ix
+	call	body
+rx01	equ	$-2
+	pop	ix
+	ret
+
+body	ld	a,b			; first test will return
+	and	a			;   to the called on @DCSTAT
+	ret	z			;   and set the Z-flag with A=0
+notdcs	cp	7
+	jr	z,rslct			; transfer on @RSLCT
+	jr	nc,diskio		; transfer on physical I/O request
+;*=*=*
+;	1 @SLCT    Select a disk drive : no-op
+;	2 @DCINIT  Initialize a controller : no-op
+;	3 @DCRES   Reset controller : no-op
+;	4 @RSTOR   Restore drive to cyl 0 : no-op
+;	5 @STEPI   Issue track step-in : no-op
+;	6 @SEEK    Seek to a disk cylinder : no-op
+;*=*=*
+retzer	sub	a
+	ret
+;*=*=*
+;	7 @RSLCT should return hardware write protection status. Set bit 6
+;	         of the accumulator to indicate the driver is write-protected
+;*=*=*
+rslct	xor	a			; ld a,040h doesn't seem to work
+	ret
+;*=*=*
+;	Diskio
+;*=*=*
+diskio	bit	2,b			; Test if read or write
+	jr	nz,wrcmd		; transfer if functions 12-15
+	cp	10
+	jr	z,vrsec
+	jr	nc,rdtrk
+	cp	9
+	jr	z,rdsec
+;*=*=*
+;	8 @RDHDR   Read ID field : no supported
+;*=*=*
+rdhdr	ld	a,32			; not supported (illegal driver num)
+	and	a
+	ret
+;*=*=*
+;	9 @RDSEC  Read disk sector
+;*=*=*
+rdsec	ld	a,(iy+6)		; get high cyl #
+	cp	d			; at or below it ?
+	jr	nc,rdok
+	ld	a,2			; "seek error during read"
+	ret				; (NZ already set)
+rdok	push	de
+	push	hl
+	call	dordsec
+rx02	equ	$-2
+	pop	hl
+	pop	de
+	ret
+	
+rddun2	ld	a,d
+	sub	(iy+9)
+	jr	nz,rddun1
+	add	a,6			; "attempt to read system data record"
+	ret
+rddun1	sub	a
+	ret
+;*=*=*
+;	9 @VRSEC : Verify sector
+;*=*=*
+vrsec	ld	a,(iy+6)		; get high cyl #
+	cp	d			; at or below it ?
+	jr	nc,rddun2		; go if so
+	ld	a,2			; "seek error during read"
+	ret				; (NZ already set)
+;*=*=*
+;	10 @RDTRK : Read a disk track : not supported
+;*=*=*
+rdtrk	ld	a,32			; Not supported
+	and	a
+	ret
+;*=*=*
+;	Write commands
+;*=*=*
+wrcmd	bit	7,(iy+3)		; check software write protect
+	jr	z,wrcmd1
+	ld	a,15			; "write protected"
+	ret
+wrcmd1	cp	14			; parse functions 12-15
+	jr	z,wrssc
+	jr	nc,wrtrk
+	cp	13
+	jr	z,wrsec
+;*=*=*
+;	12 @HDGMT : format an entire drive
+;*=*=*
+fmt	sub	a
+	ret
+;*=*=*
+;	13 @WRSEC : Write data sector (FB address mark)
+;*=*=*
+wrsec	nop
+;*=*=*
+;	14 @WRSSC : Write system sector (F8 address mark)
+;*=*=*
+wrssc	ld	a,(iy+6)		; get high cyl #
+	cp	d			; beyond it ?
+	jr	nc,wrok1
+	ld	a,10			; "seek error during write"
+	ret
+wrok1	nop
+	sub	a
+	ret
+;*=*=*
+;	@15 WRTRK Write track (format data) : not supported
+;*=*=*
+wrtrk	ld	a,32			; not support ("illegal drive number")
+	and	a
+	ret
+
+
+
+
+;*=*=*
+;	Send IM command to FreHD, and set SIZE2
+;	B = size
+;*=*=*
+sendmk	ld	a,IMFILE		; IMage command
+	out	(COMMAND2),a
+	call	wait
+rx03	equ	$-2
+	ld	a,b
+	out	(SIZE2),a
+	ret
+	
+
+;*=*=*
+;	Read sector routine
+;	C = logical drive
+;	D = cyl
+;	E = sector
+;	HL = buffer
+;*=*=*
+dordsec	ld	b,4
+	call	sendmk
+rx04	equ	$-2
+	ld	a,(iy+4)		; unit (from DCT)
+	and	07h
+	out	(DATA2),a
+	ld	a,IM_READSEC		; READSEC command
+	out	(DATA2),a
+	ld	a,d			; CYL
+	out	(DATA2),a
+	ld	a,e			; SECTOR
+	out	(DATA2),a
+	call	wait
+rx05	equ	$-2
+
+	ld	bc,DATA2
+	in	a,(ERROR2)		; get error code
+	or	a
+	jr	z,rdget			; no error, get the data
+	cp	6			; error 6 ?
+	ret	nz			; no, all errors => return error
+	ld	a,d			; error 6 : system sector
+	ld	(iy+9),a		; update DIRCYL
+	inir				; get the data
+	ld	a,6			; return error 6
+	or	a			; set NZ
+	ret
+
+rdget	ld	a,d			; CYL 0 SEC 0 ?
+	or	e
+	jr	nz,rdget2		; no, get data
+	
+	ini				; yes. 3rd byte is DIRCYL
+	ini
+	ini
+	dec	hl
+	ld	a,(hl)
+	inc	hl
+	ld	(iy+9),a		; update DIRCYL
+rdget2	inir
+	xor	a
+	ret
+
+;*=*=*
+;	Wait until FreHD has completed a command
+;	The "image command" of FreHD always returns status in ERROR2 register.
+;*=*=*
+wait	ex	(sp),hl
+	ex	(sp),hl
+wait1	in	a,(STATUS)
+	cp	0ffh			; no interface
+	jr	z,wait2
+	rlca
+	jr	c,wait1
+wait2	and	01h
+	ret
+
+
+;*=*=*
+;	End of driver
+;*=*=*
+
+dvrend	equ	$-1
+length	equ	$-entry
+
+reltab	dw	rx00,rx01,rx02,rx03,rx04,rx05
+	dw	0
+
+	end	instal

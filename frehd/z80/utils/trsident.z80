@@ -1,0 +1,33 @@
+; TRS-80 Model and OS Version Identification
+;
+; Identify TRS-80 Model Version
+;
+; Returns identified version in A
+;   0 = Unknown
+;   1 = Model 1 with Level II Basic
+;   3 = Model 3 or Model 4 running in Model 3 Mode
+;   4 = Model 4
+
+; 0x0125 = Basic Version Message in Level II/Model 3 ROM
+;   0x20 = Model 1 with Level II Basic
+;   0x49 = Model 3 or Model 4 running in Model 3 Mode
+;   0x14 = Model 4 running LS-DOS
+;
+
+WHATVER     LD      A, (0125h)
+            CP      20h             ; Model 1 with Level II Basic?
+            JR      Z, WHATVER1     ; No
+            CP      0A3h            ; Model 1 with Level II Basic 1.3 ROM?
+            JR      NZ,WHATVER3
+WHATVER1    LD      A,1             ; Yes
+            JR      WHATVEROK
+WHATVER3    CP      49h             ; Model 3 or Model 4 running in Model 3 Mode?
+            JR      NZ, WHATVER4    ; No
+            LD      A,3             ; Yes
+            JR      WHATVEROK
+WHATVER4    CP      14h             ; Model 4
+            JR      NZ, WHATVERX    ; No... Unknown Model then
+            LD      A,4             ; Yes
+            JR      WHATVEROK
+WHATVERX    LD      A,0             ; Unknown Model
+WHATVEROK   RET

@@ -1,0 +1,451 @@
+; LDOS 6.2 Parameter parsing functions
+; From http://http://nemesis.lonestar.org/computers/tandy/software/os/logical_systems/lsdos6/src631
+
+@BLD631 EQU 1
+;PARAM/ASM - LS-DOS 6.2
+;
+;	Parse a field
+;	(HL) => command line
+;	(DE) => FCB area
+;	(HL) <= 1st byte past non-<A-Z, a-z, 0-9>
+;		except 13, 3, "("
+;	Z    <= found valid field
+;	NZ   <= found invalid field
+;
+@PARSER	LD	B,8		;Set length
+
+@PAR1	LD	A,B
+	LD	(PAR6+1),A	;Stuff length for test
+	INC	B
+PAR2	LD	A,(HL)
+	CP	3		;ETX?
+	JR	Z,PAR5
+	CP	CR		;<ENTER>?
+	JR	Z,PAR5
+	CP	'('		;Begin of parm?
+	JR	Z,PAR5
+	INC	HL		;Bump pointer to next
+	CALL	TST09AZ		;Test if 0-9,A-Z
+	JR	NC,PAR3		;Go if one of the above
+	CP	'a'		;Check on lower case
+	JR	C,PAR5		;Jump on non-alpha
+	CP	'z'+1		;Is it a-z?
+	JR	NC,PAR5		;Jump on non-alpha
+	RES	5,A		;Convert lower to upper
+PAR3	DEC	B		;Count down
+	JR	Z,PAR4
+	LD	(DE),A		;Xfer the char
+	XOR	A		;Show at least 1 valid
+	LD	(PAR6+1),A	;Char was detected
+	INC	DE		;Bump FCB pointer
+	JR	PAR2		;Loop
+PAR4	INC	B		;Here on max chars ck'd
+	JR	PAR2
+PAR5	LD	C,A		;Save separator
+	IF	@BLD631
+	CP	' '		;<631>
+	JR	NZ,PAR5A	;<631>
+	DB	0FEH		;<631>Single byte skip
+PAR5B:	INC	HL		;<631>
+	CP	(HL)		;<631>
+	JR	Z,PAR5B		;<631>
+PAR5A:	LD	A,3		;<631>
+	LD	(DE),A		;<631>
+	ELSE
+	LD	A,3		;Stuff ETX
+	LD	(DE),A
+;
+;	Skip over spaces
+;
+	LD	A,C		;Was separator a space?
+	CP	' '
+	JR	NZ,PAR6		;Don't skip if not
+PAR5A	CP	(HL)		;Next char a space?
+	INC	HL
+	JR	Z,PAR5A		;Loop until not
+	DEC	HL		;Backup to last non-space
+	ENDIF
+;
+;	Return status of field validity
+;
+PAR6	LD	A,0		;Set Z-flag if at least
+	OR	A		;  1 valid char detected
+	LD	A,C		;Recover separator char
+	RET
+;
+;	Test if 0-9 or A-Z
+;
+TST09AZ	CP	'0'		;Special character?
+	RET	C		;Go if not in range
+	CP	'9'+1		;Jump on digit 0-9
+	JR	C,EXITC		;Go if 0-9 & make NC
+	CP	'A'		;Jump on spec char
+	RET	C		;Go if 3B-40
+	CP	'Z'+1		;Jump on A-Z
+EXITC	CCF			;Switch flag of result
+	RET
+;
+;	Find parameter in table
+;	(HL) => pointer to line
+;	(DE) => pointer to buffer area
+;	(BC) => pointer to parameter table
+;	(BC) <= pointer to possible response byte
+;	(DE) <= parm vector address
+;	  Z <= set if found
+;	 NZ <= if not found in table
+;
+@FNDPRM	PUSH	HL
+	LD	H,B		;Xfer table addr
+	LD	L,C
+	LD	A,(HL)		;P/u 1st byte of table
+	RLCA			;  & test for enhanced
+	PUSH	AF		;  table format
+	JR	NC,FND1
+	INC	HL		;Bump past indicator
+FND1	POP	AF		;Old or enhanced format?
+	PUSH	AF
+	LD	A,5		;Init for old lengths
+	LD	BC,1<<8 OR 2
+	JR	NC,FND1A	;Branch if old format
+	LD	A,(HL)		;  else get parm length
+	AND	0FH		;Strip flags
+	DEC	A		;Adjust for length-1
+	INC	B		;Update offset to address
+	INC	HL		;Bump past TYPE byte
+FND1A	LD	(FND3A+1),A	;Stuff the lengths
+	ADD	A,B
+	LD	(FND5A+1),A
+	ADD	A,C
+	LD	(FND2+1),A
+	LD	A,(DE)		;P/u command line byte
+	CP	(HL)		;Match 1st char of table?
+	JR	Z,FND3		;Jump if 1st char matches
+FND2	LD	BC,8		;  else bypass that entry
+	ADD	HL,BC
+	LD	A,(HL)		;Test for table end
+	OR	A
+	JR	NZ,FND1		;Loop if more
+	POP	HL		;Clean flag from stack
+	POP	HL		;Rcvr saved reg &
+	INC	A		;  set NZ for not found
+	RET
+FND3	POP	AF		;Ck old or new table
+	PUSH	AF
+	JR	NC,FND3A	;Go if old format table
+	DEC	HL		;Ck if type byte permits
+	BIT	4,(HL)		;  single-char abbrev
+	INC	HL
+	JR	Z,FND3A		;Go on no abbrev
+	INC	DE		;Make sure the next char
+	LD	A,(DE)		;  is not in the range
+	DEC	DE		;  <0-9,A-Z> before
+	CALL	TST09AZ		;  assuming abbrev
+	JR	C,FND5A		;Go on 1-char abbrevs
+FND3A	LD	B,5		;5 more chars to match
+	PUSH	HL
+	PUSH	DE
+	LD	A,B		;Don't if trailing length
+	OR	A		;  is zero
+	JR	Z,FND5
+FND4	INC	DE
+	INC	HL
+	LD	A,(DE)
+	CP	3		;ETX?
+	JR	Z,FND7
+	CP	CR		;Jump on <ENTER>
+	JR	Z,FND7
+	CP	(HL)		;Match?
+	JR	NZ,FND6		;Jump if not
+	DJNZ	FND4		;  else loop
+FND5	POP	DE		;Parm matched
+	POP	HL		;Recover begin of parm
+FND5A	LD	BC,6		;Point to address field
+	ADD	HL,BC
+	LD	C,L		;Save the response-byte
+	LD	B,H		;  pointer in BC
+	DEC	BC
+	LD	E,(HL)		;P/u parm table address
+	INC	HL
+	LD	D,(HL)
+	POP	AF		;If not enhanced, change
+	JR	C,$+4		;  pointer to bucket
+	LD	B,SBUFF$>>8	;  so we don't alter user
+	POP	HL		;Recover line position
+	XOR	A		;Show found
+	RET
+FND6	CALL	TST09AZ		;Ck if 0-9, A-Z
+	JR	NC,FND8		;Go if in range of above
+FND7	LD	A,(HL)		;Loop if table has
+	CP	' '		;  trailing spaces
+	JR	Z,FND5
+FND8	POP	DE
+	POP	HL
+	JR	FND2
+;
+;	PARAM routine
+;	 (HL) => param line
+;	 (DE) => parm table
+;	 (DE) <= table address value
+;	    C <= # of parm
+;	    Z = OK
+;	   NZ = parm error
+;
+PARAM0	INC	HL		;Bump the pointer
+PARAML	LD	A,(HL)		;  and p/u char
+	CP	CR
+	RET	Z		;Return on enter
+	CP	' '
+	JR	Z,PARAM0	;Loop on space
+	CP	'('
+	JR	NZ,PARAM5	;Jump if not left paren
+	LD	A,(DE)		;Check if enhanced table
+	RLCA
+	JR	NC,PARAM1
+	PUSH	DE		;Save pointer to start
+	INC	DE		;Point to 1st TYPE byte
+	PUSH	HL		;Save this posn
+;
+PARAML1	LD	A,(DE)		;P/u TYPE byte
+	AND	0FH
+	JR	Z,PARAML2		;Exit on end of table
+	LD	L,A		;Point to response byte
+	IF	@BLD631
+	XOR	A		;<631>
+	LD	H,A		;<631>
+	ELSE
+	LD	H,0
+	ENDIF
+	INC	L
+	ADD	HL,DE
+	IF	@BLD631
+	LD	(HL),A		;<631>Zero the response
+	ELSE
+	LD	(HL),0		;Zero the response
+	ENDIF
+	INC	HL		;Bump to the next TYPE
+	INC	HL
+	INC	HL
+	EX	DE,HL		;Table pointer back to DE
+	JR	PARAML1		;Loop thru all response bytes
+;
+PARAML2	POP	HL		;Rcvr reg
+	POP	DE		;  & start of parm table
+PARAM1	PUSH	DE
+	LD	B,15		;Max 15-char field
+	LD	DE,SBUFF$	;Point to buffer region
+	INC	HL		;Bypass the '('
+	CALL	@PAR1		;Get the field
+	DEC	HL		;Backup to separator
+	POP	DE
+	JR	NZ,ERROUT	;Return if bad field
+	CP	CR		;If separator was a CR,
+	JR	NZ,$+3		;  we need to counteract
+	INC	HL		;  the DEC HL above
+	PUSH	DE
+	LD	B,D		;Table pointer to BC
+	LD	C,E
+	LD	DE,SBUFF$	;Parm in table?
+	CALL	@FNDPRM
+	PUSH	BC		;Save response pointer
+	JR	Z,PARAM3	;Jump if found in table
+;
+;	Parameter not in table - NZ condition
+;
+PARAM2	POP	DE		;Pop response pointer
+	POP	DE		;Pop parm table pointer
+ERROUT	LD	A,44		;Set up PARM ERROR
+	RET
+;
+;	Parameter found in table - parse the value
+;
+PARAM3	LD	A,(HL)		;Test for assignment
+	CP	'='
+	IF	@BLD631
+	LD	BC,0
+	JR	Z,ASSIGN	;<631>Jump if parm=value
+	DEC	BC		;<631>
+	ELSE
+	JR	Z,ASSIGN	;Jump if parm=value
+	LD	BC,-1		;  else set symbol TRUE
+	ENDIF
+PARMSW	EX	(SP),HL		;Get response byte
+	SET	6,(HL)		;Turn on FLAG-SWITCH
+;
+;	Valid parm argument parsed into reg BC
+;
+PARAM4	EX	DE,HL		;Address pointer to HL
+	LD	(HL),C		;Stuff lo-order value
+	INC	HL
+	LD	(HL),B		;Stuff hi-order value
+	POP	HL		;Rcvr parm line pointer
+	POP	DE		;Rcvr parm table pointer
+	LD	A,(HL)
+	CP	','		;Comma separator?
+	JR	Z,PARAM1
+	CP	CR
+	IF	@BLD631
+	RET	Z		;<631>
+	ELSE
+	JR	Z,PARAM5
+	ENDIF
+	CP	')'		;Closing paren?
+	JR	NZ,ERROUT	;Leave with ERROR
+	INC	HL		;Bump line pointer
+PARAM5	XOR	A		;Show all OK
+	RET
+;
+;	Parameter assignment statement
+;
+ASSIGN	INC	HL		;Advance token past '='
+	LD	A,(HL)
+	CP	'"'		;Double quote string?
+	JR	Z,STRING
+	CP	'A'		;Ck on digit or
+	JR	C,ASS3		;  special character
+	RES	5,A		;Strip l/c if present
+	CP	'X'		;Hexadecimal?
+	JR	Z,ASS1
+	CALL	ONOFF		;Ck on Y, N, ON, OFF
+	JR	Z,PARMSW	;Set FLAG-SWITCH if OK
+	JR	PARAM2		;  else error exit
+ASS1	INC	HL
+	CALL	HEXVAL		;Ck on hex format
+	JR	NZ,PARAM2	;Error if bad format
+	JR	ASS3A		;  else bypass & set resp
+;
+;	Is the parameter numeric or flag ?
+;
+ASS3	CP	'0'		;Parameter=number ?
+	PUSH	AF		;CF = 0 if number
+	CALL	@DECHEX		;Cvt # @ HL to bin in DE
+	POP	AF
+ASS3A	EX	(SP),HL		;Get response pointer
+	JR	NC,ASS4		;Show numeric if CF=0
+	SET	6,(HL)		;  otherwise show switch
+	DB	03AH		;Skip next instruction
+ASS4	SET	7,(HL)		;Set Numeric response bit
+	JR	PARAM4
+;
+;	Parameter string entry
+;
+STRING	INC	HL		;Bypass '"'
+	LD	B,H		;Save starting address
+	LD	C,L
+STR1	LD	A,(HL)		;P/u a char
+	CP	20H
+	JR	C,PARAM2	;Exit on control char
+	INC	HL		;Bump pointer
+	CP	'"'		;Closing double quote
+	JR	NZ,STR1
+	PUSH	HL		;Save current pointer
+	SBC	HL,BC		;Calc length of string
+	LD	A,L
+	DEC	A		;Adjust for INC HL
+	CP	32		;If len > 31, set to 0
+	JR	C,$+3
+	XOR	A
+	POP	HL		;Rcvr pointer
+	EX	(SP),HL		;Get response byte
+	OR	20H		;Set FLAG-STRING
+	LD	(HL),A
+	JR	PARAM4
+;
+;	Check for Yes, No, On, Off
+;
+	IF	@BLD631
+ONOFF:				;<631>
+	ELSE
+ONOFF	LD	BC,0		;Init to FALSE
+	ENDIF
+	SUB	'Y'		;Is it Yes?
+	JR	Z,ONO1		;Jump on yes
+	ADD	A,'Y'-'N'	;Is it No?
+	JR	Z,ONO2		;Jump on no
+	DEC	A		;Is it 'O'n or 'O'ff?
+	RET	NZ		;Return if not on/off
+	INC	HL		;Bump pointer to next
+	LD	A,(HL)		;  character & p/u
+	RES	5,A		;Set lower to upper
+	CP	'F'
+	JR	Z,ONO2		;Jump on off
+	CP	'N'
+	RET	NZ		;Return if not on
+	IF	@BLD631
+ONO1	DEC	BC		;<631>Init to true
+	ELSE
+ONO1	LD	BC,-1		;Init to true
+	ENDIF
+ONO2	INC	HL		;Ignore trailing part
+	LD	A,(HL)		;  of word until closing
+	CP	')'		;  ")" or comma separator
+	RET	Z		;  or CR
+	CP	CR
+	RET	Z
+	CP	','
+	RET	Z
+	JR	ONO2		;Loop
+;
+;	Process hexadecimal assignment
+;
+	IF	@BLD631
+HEXVAL:				;<631>
+	ELSE
+HEXVAL	LD	BC,0		;Init value to zero
+	ENDIF
+	LD	A,(HL)		;P/u a char
+	CP	27H		;Must be single quote
+	RET	NZ		;Ret if not
+HEX1	INC	HL		;Bump past it
+	LD	A,(HL)		;P/u possible hex digit
+	SUB	30H		;Begin conversion
+	JR	C,HEX2		;Jump if < "0"
+	CP	10		;Ck for 0-9
+	JR	C,HEX3		;Jump if digit is 0-9
+	RES	5,A		;Strip l/c if present
+	SUB	7		;  else ck A-F
+	CP	16
+	JR	C,HEX3		;Jump if A-F
+HEX2	LD	A,(HL)		;Test for closing quote
+	CP	27H
+	INC	HL		;Bump pointer
+	RET	Z		;Ret if closing quote
+	DEC	HL		;  else backup, set OK,
+	XOR	A		;  then return
+	RET
+HEX3	PUSH	BC		;Exchange BC & HL
+	EX	(SP),HL		;  and save HL
+	ADD	HL,HL		;Multiply by 16
+	ADD	HL,HL
+	ADD	HL,HL
+	ADD	HL,HL
+	LD	B,H		;Merge new digit
+	ADD	A,L
+	LD	C,A
+	POP	HL		;Recover pointer
+	JR	HEX1		;Loop
+;
+;	Process decimal assignment
+;
+@DECHEX	LD	BC,0		;Init value to zero
+DEC1	LD	A,(HL)		;P/u a char
+	SUB	30H		;Cvrt to binary
+	RET	C		;Return if < "0"
+	CP	10		;Ck for bad decimal
+	RET	NC		;Ret if not 0-9
+	PUSH	BC		;Exchange BC & HL
+	EX	(SP),HL		;  & save HL on stack
+	ADD	HL,HL		;Multiply by 10
+	ADD	HL,HL
+	ADD	HL,BC
+	ADD	HL,HL
+	LD	B,0		;Merge in new digit
+	LD	C,A		;New digit to C
+	ADD	HL,BC		;  & add it in
+	LD	B,H		;Current value to BC
+	LD	C,L
+	POP	HL		;Recover HL pointer
+	INC	HL
+	JR	DEC1		;Loop
+		
+SBUFF$  DS  0FFh
+

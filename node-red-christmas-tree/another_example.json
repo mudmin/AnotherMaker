@@ -1,0 +1,390 @@
+[
+    {
+        "id": "938850eddb12fd50",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "2438e81b8f7f815f",
+        "type": "rpi-gpio out",
+        "z": "938850eddb12fd50",
+        "name": "5 - Green",
+        "pin": "5",
+        "set": true,
+        "level": "0",
+        "freq": "",
+        "out": "out",
+        "bcm": true,
+        "x": 880,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "5a1f12f9c405f6fc",
+        "type": "rpi-gpio out",
+        "z": "938850eddb12fd50",
+        "name": "6 - Green Top",
+        "pin": "6",
+        "set": true,
+        "level": "0",
+        "freq": "",
+        "out": "out",
+        "bcm": true,
+        "x": 900,
+        "y": 20,
+        "wires": []
+    },
+    {
+        "id": "0f52736ef7e62e97",
+        "type": "rpi-gpio out",
+        "z": "938850eddb12fd50",
+        "name": "9 - Red",
+        "pin": "9",
+        "set": true,
+        "level": "0",
+        "freq": "",
+        "out": "out",
+        "bcm": true,
+        "x": 880,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "528ee71bb796cefa",
+        "type": "rpi-gpio out",
+        "z": "938850eddb12fd50",
+        "name": "11 - Red",
+        "pin": "11",
+        "set": true,
+        "level": "0",
+        "freq": "",
+        "out": "out",
+        "bcm": true,
+        "x": 880,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "5fe7f6bebba61253",
+        "type": "rpi-gpio out",
+        "z": "938850eddb12fd50",
+        "name": "12 - Green",
+        "pin": "12",
+        "set": true,
+        "level": "0",
+        "freq": "",
+        "out": "out",
+        "bcm": true,
+        "x": 890,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "dd07d814eaac238b",
+        "type": "rpi-gpio out",
+        "z": "938850eddb12fd50",
+        "name": "13 - Red",
+        "pin": "13",
+        "set": true,
+        "level": "0",
+        "freq": "",
+        "out": "out",
+        "bcm": true,
+        "x": 880,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "066af737d673024e",
+        "type": "rpi-gpio out",
+        "z": "938850eddb12fd50",
+        "name": "19 - Green",
+        "pin": "19",
+        "set": true,
+        "level": "0",
+        "freq": "",
+        "out": "out",
+        "bcm": true,
+        "x": 890,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "888502a308262706",
+        "type": "rpi-gpio out",
+        "z": "938850eddb12fd50",
+        "name": "16 - Red",
+        "pin": "16",
+        "set": true,
+        "level": "0",
+        "freq": "",
+        "out": "out",
+        "bcm": true,
+        "x": 880,
+        "y": 540,
+        "wires": []
+    },
+    {
+        "id": "66b0f9676530adeb",
+        "type": "rpi-gpio out",
+        "z": "938850eddb12fd50",
+        "name": "26 - Red",
+        "pin": "26",
+        "set": true,
+        "level": "0",
+        "freq": "",
+        "out": "out",
+        "bcm": true,
+        "x": 880,
+        "y": 600,
+        "wires": []
+    },
+    {
+        "id": "5ab5bb9f219fce5f",
+        "type": "inject",
+        "z": "938850eddb12fd50",
+        "name": "On",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": ".5",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "1",
+        "payloadType": "num",
+        "x": 130,
+        "y": 240,
+        "wires": [
+            [
+                "de1408bce66efa93"
+            ]
+        ]
+    },
+    {
+        "id": "d2c509ebbecb368c",
+        "type": "inject",
+        "z": "938850eddb12fd50",
+        "name": "Off",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "0",
+        "payloadType": "num",
+        "x": 130,
+        "y": 360,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "38514c27ce81e4e8",
+        "type": "rpi-gpio out",
+        "z": "938850eddb12fd50",
+        "name": "Test",
+        "pin": "6",
+        "set": "",
+        "level": "0",
+        "freq": "",
+        "out": "out",
+        "bcm": true,
+        "x": 410,
+        "y": 540,
+        "wires": []
+    },
+    {
+        "id": "fa01236a7fb28bdc",
+        "type": "inject",
+        "z": "938850eddb12fd50",
+        "name": "On",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "1",
+        "payloadType": "num",
+        "x": 170,
+        "y": 480,
+        "wires": [
+            [
+                "38514c27ce81e4e8"
+            ]
+        ]
+    },
+    {
+        "id": "3bb96ab649d4bb48",
+        "type": "inject",
+        "z": "938850eddb12fd50",
+        "name": "Off",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "0",
+        "payloadType": "num",
+        "x": 170,
+        "y": 560,
+        "wires": [
+            [
+                "38514c27ce81e4e8"
+            ]
+        ]
+    },
+    {
+        "id": "67e63cc04171f07d",
+        "type": "trigger",
+        "z": "938850eddb12fd50",
+        "name": "",
+        "op1": "1",
+        "op2": "0",
+        "op1type": "str",
+        "op2type": "str",
+        "duration": "500",
+        "extend": false,
+        "overrideDelay": false,
+        "units": "ms",
+        "reset": "",
+        "bytopic": "all",
+        "topic": "topic",
+        "outputs": 1,
+        "x": 580,
+        "y": 80,
+        "wires": [
+            [
+                "5a1f12f9c405f6fc",
+                "2438e81b8f7f815f",
+                "5fe7f6bebba61253",
+                "066af737d673024e"
+            ]
+        ]
+    },
+    {
+        "id": "d4b89ef704342393",
+        "type": "trigger",
+        "z": "938850eddb12fd50",
+        "name": "",
+        "op1": "1",
+        "op2": "0",
+        "op1type": "str",
+        "op2type": "str",
+        "duration": "500",
+        "extend": false,
+        "overrideDelay": false,
+        "units": "ms",
+        "reset": "",
+        "bytopic": "all",
+        "topic": "topic",
+        "outputs": 1,
+        "x": 580,
+        "y": 460,
+        "wires": [
+            [
+                "0f52736ef7e62e97",
+                "528ee71bb796cefa",
+                "dd07d814eaac238b",
+                "888502a308262706",
+                "66b0f9676530adeb"
+            ]
+        ]
+    },
+    {
+        "id": "de1408bce66efa93",
+        "type": "random",
+        "z": "938850eddb12fd50",
+        "name": "",
+        "low": 1,
+        "high": "3",
+        "inte": "true",
+        "property": "payload",
+        "x": 280,
+        "y": 240,
+        "wires": [
+            [
+                "84d3c25e4a8b64ab"
+            ]
+        ]
+    },
+    {
+        "id": "84d3c25e4a8b64ab",
+        "type": "switch",
+        "z": "938850eddb12fd50",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "2",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "3",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 3,
+        "x": 430,
+        "y": 240,
+        "wires": [
+            [
+                "67e63cc04171f07d"
+            ],
+            [
+                "d4b89ef704342393"
+            ],
+            [
+                "67e63cc04171f07d",
+                "d4b89ef704342393"
+            ]
+        ]
+    }
+]

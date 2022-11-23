@@ -1,0 +1,12 @@
+; VHDUTL - Utility for the Vecoven Hard Drive Emulator
+; TRS-80 CP/M 2.2 Version
+
+; Kaypro Port Definitions differ from TRS-80
+
+DATA2       EQU     08AH
+SIZE2       EQU     08BH
+COMMAND2    EQU     08CH
+ERROR2      EQU     08DH
+STATUS      EQU     087H
+
+            INCLUDE vhdutl_cpm.z80
