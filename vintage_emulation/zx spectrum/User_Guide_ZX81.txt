@@ -1,0 +1,135 @@
+ZX81 emulator for Raspberry Pi
+
+For writing image to micro sd card, I recommend Etcher, with a very user friendly interface.
+Here are several version of Etcher for download, depending on the OS version you are using:
+https://www.balena.io/etcher/
+https://www.filehippofilex.com/etcher/
+Its even support zip packed files, so you dont need to unpack your img file at all.
+Just drag and drop zip image file to Etcher, click on Flash button and wait for it to finish.
+
+Its very important that you have a quality micro sd card, which leaves as much free space as described.
+Cheap cards often leaves slightly less space than the declared and then there may not be enough space to write a disc image.
+For the best performance, a quality 16 Gb (class 10) microsd card or larger is recommended.
+This image was made by default for any LCD TV full HD or HD ready.
+For the best visual experience, set the aspect ratio to 4:3 in your TV settings.
+
+
+Emulator Controls:
+
+Mouse and Keyboard are supported.
+
+Keyboard:
+
+The functions of the control bar are listed below alongside their keyboard equivalents:
+
+
+F2      - 	Options
+F3	-	Load file dialog (e.g. press F3, navigate to zx81 folder to access software collection)
+Exit	-	Exit emulator (F10)
+Reset	-	Reset emulator (F12)
+Hide	-	Toggle virtual keyboard between autohide and don't hide (F6)
+Sticky	-	Toggle between sticky shift and toggle shift (F7)
+Opacity	-	Reduce (HOME) or increase (END) virtual keyboard opacity
+Video	-	Toggle between not inverse and inverse video (F8)
+Savestate	-	Toggle the save state dialog if available (F4)
+Loadstate	-	Toggle the load state dialog if available (F5)
+
+
+Click screen	-	Toggle virtual keyboard and control bar
+Backspace	-	Rubout i.e. equivalent to using SHIFT + 0
+Comma	-	Equivalent to using SHIFT + .
+Cursors	-	Equivalent to using SHIFT + 5, 6, 7 and 8
+-/=	-	Decrease/increase the volume (if supported)
+ALT + R	-	Cycle between 960x720, 640x480 and 320x240
+F11	-	Toggle between fullscreen and a window
+F9	-	Activate the control remapper for remapping
+-	joystick controls to keyboard controls
+PrtScn	-	Save a screenshot to the local scnsht folder
+Pause	-	Place emulation on hold but not the GUI
+The Virtual Keyboard and Control Bar
+Clicking the screen (or F1) brings up the virtual keyboard and the control bar enabling access to several very useful features. If a joystick is detected, the "J" key will be highlighted.
+
+
+
+General GUI Navigation:
+
+Every component has a green selector that can be moved around using the cursor keys or the joystick. The item currently selected can be activated with the Enter key, a joystick button (selector hit) or by clicking with the mouse. If you use the mouse then of course you are free to activate items directly and can ignore the selector. Page Up and Page Down (or joystick equivalents) will flip between pages and scroll through lists. The Escape key operates as you might expect: it closes the topmost dialog or component and will continue to do so until the emulator window is reached.
+
+
+Hardware Options:
+
+The F2 key toggles the runtime options which start with the options for the hardware. The defaults machine is ZX81 with 16 Kb of RAM memory.
+With this options you can change default model to ZX80 and he will boot at startup.
+
+hardware
+
+Most likely, most settings are self-explanatory. "M1NOT" refers to the possibility of running machine code in the 32-48K part of the memory. The next page contains:
+
+sound
+
+where the AY Unreal sound emulation has been selected. Use "VSYNC" for the sound that the ZX80/81 normally produces. The next page contains:
+
+gui
+
+Note that the volume of the sound may also be adjusted with the "-" and "=" keys.
+
+
+Loading a Program File:
+
+Typing the ZX80's LOAD ("W", newline) or the ZX81's LOAD "" ("J", SHIFT + "P" twice, newline) will show the load file dialog. There is a much easier way to show the same dialog and that's via the control bar icon or the F3 key (joystick select) but there is a fundamental difference in the way that these two methods work that you should be made aware of: a machine reset will occur if you load a program file by directly activating the dialog but not if you activate it via the machine's LOAD command. For the most part this won't matter at all, but if you are intending to set-up RAMTOP, load a program above it before loading another program then you will lose everything if you load a program by invoking the dialog directly.
+
+If you have an understanding of the ZX81 then you will know that it is possible to load a program by executing LOAD "PROG" in which case emulator's loading mechanism will search for prog.p or PROG.P within the last directory navigated to, or if you've yet to navigate anywhere then the start-up folder. If you'd like to load an .81 file instead then the .p extension can be overridden by appending an .81 suffix e.g LOAD "PROG.81".
+
+There are some additional ways to navigate and utilise the load file dialog that enhance its operability: directories can be opened and programs loaded with a single mouse or stylus click, the scrollbar is interactive and the list can be scrolled using a mouse wheel. It is also possible to select an item by typing its initial letter or number and then cycling to subsequent items with repeated presses.
+
+
+Saving a Program File:
+
+On the ZX80 saving is achieved by executing SAVE ("E", newline), but since there is no way to pass a filename and indeed no native emulator save file dialog either, a choice of two naming methods have been made available: the first and default method is to save the program into the last folder navigated to with the load file dialog (or the start-up directory) with a sequential filename e.g. zx80prog0123.o. The second funkier method is to embed a BASIC line somewhere within the program e.g. 9999 REM SAVE "PROG". The line number used is not important, but the use of the SAVE keyword is so you'll need to type 9999 SAVE "PROG" and then move the cursor back before SAVE and add a REM. When the program is saved by executing SAVE, emulator's program saving mechanism will look for this embedded BASIC REM statement and extract the filename. The default .o extension can be overridden by appending a .80 suffix. Please note that if you are using a version of emulator that's been ported to a non *nix platform, these filenaming methods may have been replaced with a save dialog native to your OS.
+
+
+Saving and Loading Data Files:
+
+With the commands
+
+    SAVE "FILE;ADDRESS,length"
+    LOAD "FILE;ADDRESS"
+  
+data at the specified location and length can be saved to or loaded from a file. These work with and without ZXpand emulation.
+
+
+Saving and Loading State Files:
+
+Emulator supports the saving and later reloading of images that are most commonly known as save state files. They are simply files containing dumps of the emulated machine's memory and the emulator's variables to enable a program to be restored to the same state at some other point in the future. So, after loading a game and playing the first level or two you find that your lunch break is over and you'd like to save your current position within the game to continue with later when distraction beckons - simply activate the save state dialog by pressing F4 or selecting it from the control bar and choose a slot. Slots that are inverse have an existing state already stored there (from the same program) so either choose a new slot or overwrite an existing one. This can be achieved by clicking a slot with the mouse or stylus, moving the selector and pressing enter (selector hit) or pressing a number from 1 to 9.
+
+Loading a save state file requires that the original game is loaded first and then the load state dialog can be activated with F5 or via the control bar. Then simply choose one of the previous slots that you've saved to and away you go.
+
+
+Configuring a Joystick:
+
+If you have a digital or analogue joystick plugged in and you'd like to use it then open the runtime options (F2 from within the emulator or select the control bar icon) and employ the joystick configurator using either the cursor keys and enter, the mouse or stylus or the joystick once configured. Select a control on the graphical joystick representation (the selector will blink) and follow the instructions configuring as many of the controls as you possibly can for optimum usability. By default, the 'J' key is selected if the joystick has been detected.
+
+
+Remapping Joystick Controls:
+
+With the virtual keyboard and control bar visible, position the selector over the function that you'd like to assign to a joystick control and press the control remapper (the selector will blink). Then press a joystick control to remap the function to the control. Existing controls that have been remapped are active within the emulator (you cannot remap GUI controls) whilst new controls are universally active. It is possible to include the SHIFT modifier within the control as long as it is active before you initiate remapping. To cancel remapping press the control remapper again.
+
+
+Exiting emulator:
+
+Upon exiting, if you have modified any of the configurable options you will be presented with a dialog requesting that you confirm writing the changes to the configuration file (emulatorrc, emulator.ini). If you choose "No" then the changes will be discarded. This is useful for when you have configured the emulator just how you like it and don't wish to disturb it with unimportant modifications.
+
+
+ZX81 Chroma 81 SCART Interface:
+
+From http://www.fruitcake.plus.com/Sinclair/ZX81/Chroma/ChromaInterface.htm: "The Chroma 81 interface is a multi-purpose peripheral for the ZX81. Its primary function is to allow the ZX81 to be connected to a TV via a SCART socket to produce an RGB picture that is sharp and bright." Its emulation is enabled by default if there is enough RAM (see Hardware Options).
+
+
+ZXpand Emulation:
+
+ZXpand is a hardware add-on for the ZX81 that provides an SD Card, 32K RAM, and routines to save and load programs from the SD card. A number of BASIC commands have been changed to add CAT, DELETE, and CONFIG commands.
+
+For example, this adventure game: In Nihilum Reverteris needs high resolution, AY sound, and ZXpand emulation. The latter needs a version of emulator compiled with this emulation feature enabled. Files may be stored in the "ZXpand_SD_Card" directory near the emulator installation directory.
+
+
+Enjoy!

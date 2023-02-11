@@ -1,0 +1,70 @@
+Apple II emulator for Raspberry Pi
+
+User Guide:
+==========
+
+For writing image to micro sd card, I recommend Etcher, with a very user friendly interface.
+Here are several version of Etcher for download, depending on the OS version you are using:
+https://www.balena.io/etcher/
+https://www.filehippofilex.com/etcher/
+Its even support zip packed files, so you dont need to unpack your img file at all.
+Just drag and drop zip image file to Etcher, click on Flash button and wait for it to finish.
+
+Its very important that you have a quality micro sd card, which leaves as much free space as described.
+Cheap cards often leaves slightly less space than the declared and then there may not be enough space to write a disc image.
+For the best performance, a quality 16 Gb (class 10) microsd card or larger is recommended.
+This image was designed to work on any LCD TV full HD or HD ready, with HDMI connectivity.
+
+
+Emulator usage:
+==============
+
+At first start you should see an DOS3.3(tm) prompt. By pressing F3 you may select an image file name (usually having extensions .dsk, .do, .po) into Slot 6 Drive 1. After selecting it, you need to press F2 key and boot from the inserted disk, or type any DOS3.3(tm) commands to view disk contents and to run any program located in it. Common DOS commands are `CATALOG' (like `ls' in Linux), `BRUN FILENAME' - running any binary (B) program, or `RUN FILENAME' - running any Basic program (A or I). Usually, most game images have alternative way to run programs in them.
+
+You may find a lot of disk images in "Apple_II_software" folder.
+Some folders with games contain a large amount of files and it take some time to read their contents, so please be patient while browsing.
+
+
+To quit emualtor, press F10.
+It is highly recommended that quit from the emulator always be done regularly with F10, for the complete shutdown process.
+
+Emulator controls:
+=================
+
+     F1 - Show help screen
+     F2 - Cold reset and boot inserted disk
+     Shift+F2 - Restart emulator
+     F3, F4 - Choose an image file name for floppy disk in Slot 6 drive 1 or 2 respectively
+     Shift+F3, Shift+F4 - The same thing for Apple hard disks (in Slot 7)
+	Alt+F3,Alt+F4 - same as F3,F4 using FTP (see emulator.conf about configuring FTP accounts)
+	Alt+Shift+F3, Alt+Shift+F4 - same as Shift+F3, Shift+F4 but using FTP account (see above)
+
+     F5 - Swap drives for Slot 6
+     F6 - Toggle fullscreen mode
+     F7 - Reserved for Debugger!
+     F8 - Save current screen as a .bmp file
+     Shift+F8 - Save settings changable in runtime in conf file
+     
+     F9 - Cycle through various video modes
+     F10 - Quit emulator
+
+     F11 - Save current state to file, Alt+F11 - quick save
+     F12 - Reload it from file, Alt+F12 - quick load
+
+     Ctrl+0..9	- fast load state snapshot with corresponding number, saved previously by
+     Ctrl+Shift+0..9 - fast save snapshot to current snapshot directory with corresponding number 0..9
+
+     Ctrl+F12 - Hot reset
+
+      Pause - Pause emulator
+      Scroll Lock - Toggle full speed
+    Num pad keys:
+     Grey + - Speed up emulator
+     Grey - - Speed it down
+     Grey * - Normal speed
+
+
+Note:
+When mouse works as a joystick, or Mouse Interface is on, when you first left-click on the window of emulator, mouse cursor is grabbed for using inside it. To release cursor, you should click left-mouse button again with SHIFT or CTRL key pressed. In fullscreen mode mouse cursor is always grabbed, to release it you may want to switch to windowed mode by pressing F6 key.
+
+Enjoy.
