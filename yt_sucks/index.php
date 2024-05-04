@@ -1,10 +1,38 @@
 <?php
 session_start();
+$version = "1.1.0";
+$date = "May 4, 2024";
 
 // Generate CSRF token and store it in session
 if (!isset($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
+
+if (!function_exists('dump')) {
+    function dump($var)
+    {
+      if (is_array($var) || is_object($var))
+      {
+        echo '<pre>';
+        print_r($var);
+        echo '</pre>';
+      }
+      else
+      {
+        echo $var;
+      }
+    }
+}
+
+if (!function_exists('dnd')) {
+    function dnd($var)
+    {
+  
+         dump($var);
+      die();
+    }
+  }
+  
 
 // Validate CSRF token
 function validate_csrf_token($token)
@@ -23,34 +51,45 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Check if the URL starts with "https://www.youtube" or "https://youtube"
     if (strpos($url, 'https://www.youtube') !== 0 && strpos($url, 'https://youtube') !== 0) {
-        // Redirect to the same page with an error message
+
         header("Location: " . $_SERVER['PHP_SELF'] . "?error=invalid_url");
         exit();
     }
+    //throw away anything after and including the first "&"
+    $url = explode("&", $url)[0];
+    $content = htmlspecialchars(file_get_contents($url));
+   
+// Apply regex to capture channel IDs
+preg_match_all('/\/UC([\w-]+)(?="|\/)/', $content, $matches);
 
-    // Fetch the content of the page
-    $content = file_get_contents($url);
-    // search for the "canonicalBaseUrl" pattern
-    preg_match('/"canonicalBaseUrl":"\/channel\/(UC[\w-]+)"/', $content, $matches);
+// Filter out UC codes that are longer than 25 characters before any processing
+$validUCs = array_filter($matches[1], function($uc) {
+    return strlen($uc) <= 25;
+});
 
-    // If a match is not found, search for the YouTube channel ID pattern
-    if (empty($matches)) {
-        preg_match('/youtube\.com\/channel\/(UC[\w-]+)/', $content, $matches);
-    }
 
-    // If a match is found, modify the channel ID and redirect to the original URL with the modified list parameter
-    if (!empty($matches)) {
-        $channelId = $matches[1];
-        // Modify the channel ID by replacing the second character with 'U'
-        $modifiedChannelId = substr_replace($channelId, 'U', 1, 1);
-        // Redirect to the original URL with the modified list parameter
-        header("Location: $url&list=$modifiedChannelId");
-        exit();
-    } else {
-        // If the channel ID is not found, redirect to the same page with an error message
-        header("Location: " . $_SERVER['PHP_SELF'] . "?error=channel_id_not_found");
-        exit();
-    }
+// Count the occurrences of each unique valid UC code
+$channelCounts = array_count_values($validUCs);
+
+// Debug to display channel counts
+// dnd($channelCounts);
+
+// Check if there are any channel IDs found
+if (!empty($channelCounts)) {
+    // Get the most frequent channel ID
+    $mostFrequentChannel = array_keys($channelCounts, max($channelCounts))[0];
+
+    // Modify the channel ID if necessary
+    $modifiedChannelId = "UU" . $mostFrequentChannel;
+
+    // Redirect to the original URL with the modified list parameter
+    header("Location: $url&list=$modifiedChannelId");
+    exit();
+}
+
+// Redirect with an error message if no valid channel IDs found
+header("Location: " . $_SERVER['PHP_SELF'] . "?error=channel_id_not_found");
+exit();
 }
 
 // If there's an error, display the appropriate message
@@ -78,6 +117,9 @@ if ($error === 'invalid_url') {
             <div class="card">
                 <div class="card-header">
                     <h3>Fix YouTube Play All</h3>
+                    <h5>
+                        Version: <?php echo $version; ?> | Date: <?php echo $date; ?>
+                    </h5>
                 </div>
                 <div class="card-body">
                     <?php if ($errorMsg !== '') : ?>
