@@ -18,6 +18,60 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         die("CSRF token validation failed!");
     }
 }
+
+// Define categories
+$cats = [
+    'electronics' => 'Electronics',
+    'apparel' => 'Clothing',
+    'entertainment' => 'Entertainment',
+    'family' => 'Family',
+    'free' => 'Free',
+    'garden' => 'Home & Garden',
+    'home' => 'Home Goods',
+    'home-improvements' => 'Home Improvement',
+    'hobbies' => 'Hobbies',
+    'instruments' => 'Instrument',
+    'propertyforsale' => 'Property',
+    'sports' => 'Sporting Goods',
+    'toys' => 'Toys',
+    'vehicles' => 'Vehicles',
+];
+
+
+$searchTerm = '';
+$category = '';
+
+// Check if form is submitted
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Get search term
+    $searchTerm = isset($_POST['search']) ? $_POST['search'] : '';
+
+    // Get category
+    $category = isset($_POST['custom_cat']) && !empty($_POST['custom_cat']) ? $_POST['custom_cat'] : (isset($_POST['category']) ? $_POST['category'] : '');
+
+    // Build query parameters
+    $queryParams = [];
+    $queryParams[] = 'deliveryMethod=local_pick_up';
+    $queryParams[] = 'query=' . urlencode($searchTerm);
+    $queryParams[] = 'sortBy=distance_ascend';
+    if (isset($_POST['exact']) && $_POST['exact'] === 'on') {
+        $queryParams[] = 'exact=true';
+    }
+
+    // Build query string
+    $queryString = implode('&', $queryParams);
+
+    // Build URL
+    $url = 'https://www.facebook.com/marketplace/';
+    if (!empty($category)) {
+        $url .= 'category/' . $category . '/';
+    }
+    $url .= '?' . $queryString;
+
+    // Redirect to constructed URL
+    header("Location: $url");
+    exit();
+}
 ?>
 
 <!doctype html>
@@ -31,61 +85,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </head>
 
 <body>
-    <?php
-    // Define categories
-    $cats = [
-        'electronics' => 'Electronics',
-        'apparel' => 'Clothing',
-        'entertainment' => 'Entertainment',
-        'family' => 'Family',
-        'free' => 'Free',
-        'garden' => 'Home & Garden',
-        'home' => 'Home Goods',
-        'home-improvements' => 'Home Improvement',
-        'hobbies' => 'Hobbies',
-        'instruments' => 'Instrument',
-        'propertyforsale' => 'Property',
-        'sports' => 'Sporting Goods',
-        'toys' => 'Toys',
-        'vehicles' => 'Vehicles',
-    ];
 
-
-    $searchTerm = '';
-    $category = '';
-
-    // Check if form is submitted
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        // Get search term
-        $searchTerm = isset($_POST['search']) ? $_POST['search'] : '';
-
-        // Get category
-        $category = isset($_POST['custom_cat']) && !empty($_POST['custom_cat']) ? $_POST['custom_cat'] : (isset($_POST['category']) ? $_POST['category'] : '');
-
-        // Build query parameters
-        $queryParams = [];
-        $queryParams[] = 'deliveryMethod=local_pick_up';
-        $queryParams[] = 'query=' . urlencode($searchTerm);
-        $queryParams[] = 'sortBy=distance_ascend';
-        if (isset($_POST['exact']) && $_POST['exact'] === 'on') {
-            $queryParams[] = 'exact=true';
-        }
-
-        // Build query string
-        $queryString = implode('&', $queryParams);
-
-        // Build URL
-        $url = 'https://www.facebook.com/marketplace/';
-        if (!empty($category)) {
-            $url .= 'category/' . $category . '/';
-        }
-        $url .= '?' . $queryString;
-
-        // Redirect to constructed URL
-        header("Location: $url");
-        exit();
-    }
-    ?>
 
     <div class="row mt-3">
         <div class="col-12 col-md-8 col-lg-4 offset-md-2 offset-lg-4">
