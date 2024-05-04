@@ -11,28 +11,25 @@ if (!isset($_SESSION['csrf_token'])) {
 if (!function_exists('dump')) {
     function dump($var)
     {
-      if (is_array($var) || is_object($var))
-      {
-        echo '<pre>';
-        print_r($var);
-        echo '</pre>';
-      }
-      else
-      {
-        echo $var;
-      }
+        if (is_array($var) || is_object($var)) {
+            echo '<pre>';
+            print_r($var);
+            echo '</pre>';
+        } else {
+            echo $var;
+        }
     }
 }
 
 if (!function_exists('dnd')) {
     function dnd($var)
     {
-  
-         dump($var);
-      die();
+
+        dump($var);
+        die();
     }
-  }
-  
+}
+
 
 // Validate CSRF token
 function validate_csrf_token($token)
@@ -58,38 +55,38 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     //throw away anything after and including the first "&"
     $url = explode("&", $url)[0];
     $content = htmlspecialchars(file_get_contents($url));
-   
-// Apply regex to capture channel IDs
-preg_match_all('/\/UC([\w-]+)(?="|\/)/', $content, $matches);
 
-// Filter out UC codes that are longer than 25 characters before any processing
-$validUCs = array_filter($matches[1], function($uc) {
-    return strlen($uc) <= 25;
-});
+    // Apply regex to capture channel IDs
+    preg_match_all('/\/UC([\w-]+)(?="|\/)/', $content, $matches);
+
+    // Filter out UC codes that are longer than 25 characters before any processing
+    $validUCs = array_filter($matches[1], function ($uc) {
+        return strlen($uc) <= 25;
+    });
 
 
-// Count the occurrences of each unique valid UC code
-$channelCounts = array_count_values($validUCs);
+    // Count the occurrences of each unique valid UC code
+    $channelCounts = array_count_values($validUCs);
 
-// Debug to display channel counts
-// dnd($channelCounts);
+    // Debug to display channel counts
+    // dnd($channelCounts);
 
-// Check if there are any channel IDs found
-if (!empty($channelCounts)) {
-    // Get the most frequent channel ID
-    $mostFrequentChannel = array_keys($channelCounts, max($channelCounts))[0];
+    // Check if there are any channel IDs found
+    if (!empty($channelCounts)) {
+        // Get the most frequent channel ID
+        $mostFrequentChannel = array_keys($channelCounts, max($channelCounts))[0];
 
-    // Modify the channel ID if necessary
-    $modifiedChannelId = "UU" . $mostFrequentChannel;
+        // Modify the channel ID if necessary
+        $modifiedChannelId = "UU" . $mostFrequentChannel;
 
-    // Redirect to the original URL with the modified list parameter
-    header("Location: $url&list=$modifiedChannelId");
+        // Redirect to the original URL with the modified list parameter
+        header("Location: $url&list=$modifiedChannelId");
+        exit();
+    }
+
+    // Redirect with an error message if no valid channel IDs found
+    header("Location: " . $_SERVER['PHP_SELF'] . "?error=channel_id_not_found");
     exit();
-}
-
-// Redirect with an error message if no valid channel IDs found
-header("Location: " . $_SERVER['PHP_SELF'] . "?error=channel_id_not_found");
-exit();
 }
 
 // If there's an error, display the appropriate message
@@ -117,9 +114,9 @@ if ($error === 'invalid_url') {
             <div class="card">
                 <div class="card-header">
                     <h3>Fix YouTube Play All</h3>
-                    <h5>
-                        Version: <?php echo $version; ?> | Date: <?php echo $date; ?>
-                    </h5>
+                    <small>
+                        Version: <?php echo $version; ?> | Updated: <?php echo $date; ?>
+                    </small>
                 </div>
                 <div class="card-body">
                     <?php if ($errorMsg !== '') : ?>
