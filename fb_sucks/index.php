@@ -1,3 +1,26 @@
+
+<?php
+session_start();
+
+// Generate CSRF token and store it in session
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
+// Validate CSRF token
+function validate_csrf_token($token)
+{
+    return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
+}
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $csrf_token = $_POST['csrf_token'] ?? '';
+    if (!validate_csrf_token($csrf_token)) {
+        die("CSRF token validation failed!");
+    }
+}
+?>
+
 <!doctype html>
 <html lang="en">
 
@@ -73,11 +96,13 @@
                 </div>
                 <div class="card-body">
                     <form method="post">
+                        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
                         <div class="mb-3">
                             <label for="search" class="form-label">Search Facebook</label>
                             <input type="text" class="form-control" id="search" name="search" value="<?= $searchTerm ?>" autofocus>
                         </div>
-
+                        <hr>
+                        <h6><b>Note:</b> You REALLY want a category whether from the list or one you type in yourself.</h6>
                         <div class="mb-3">
                             <label for="category" class="form-label">Category</label>
                             <select class="form-select" id="category" name="category">
@@ -94,20 +119,22 @@
                         </div>
 
                         <div class="mb-3">
-                            <input type="checkbox" class="form-check-input" id="exact" name="exact" <?= isset($_POST['exact']) && $_POST['exact'] === 'on' ? 'checked' : '' ?>
-                            <?php 
-                            if(empty($_POST)){
-                                echo 'checked';
-
-                            } 
-                            ?>
-                   
-                            >
+                            <input type="checkbox" class="form-check-input" id="exact" name="exact" <?= isset($_POST['exact']) && $_POST['exact'] === 'on' ? 'checked' : '' ?> <?php
+                                                                                                                                                                                if (empty($_POST)) {
+                                                                                                                                                                                    echo 'checked';
+                                                                                                                                                                                }
+                                                                                                                                                                                ?>>
                             <label for="exact" class="form-label">Prefer Exact Search Term</label>
                         </div>
                         <button type="submit" class="btn btn-primary">Search</button>
                     </form>
                 </div>
+                <p class="text-center pt-3">
+                    Want to host your own version of this? Check out the <a href="https://github.com/mudmin/AnotherMaker/tree/master/yt_sucks">Get the Code</a>.
+                </p>
+                <p class="text-center pt-2">
+                    If you appreciate my work, feel free to donate at <a href="https://userspice.com/donate/">https://userspice.com/donate/</a>.
+                </p>
             </div>
         </div>
     </div>
