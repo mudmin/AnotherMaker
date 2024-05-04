@@ -128,7 +128,7 @@ if ($error === 'invalid_url') {
                         <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
                         <div class="mb-3">
                             <label for="search" class="form-label">Enter a link to one video from the channel you want to play</label>
-                            <input type="text" class="form-control" id="video" name="video" autofocus>
+                            <input type="text" class="form-control" id="video" name="video" autofocus required>
                         </div>
                         <button type="submit" class="btn btn-primary">Go</button>
                     </form>

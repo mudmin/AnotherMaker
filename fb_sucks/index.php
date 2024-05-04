@@ -98,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
                         <div class="mb-3">
                             <label for="search" class="form-label">Search Facebook</label>
-                            <input type="text" class="form-control" id="search" name="search" value="<?= $searchTerm ?>" autofocus>
+                            <input type="text" class="form-control" id="search" name="search" value="<?= $searchTerm ?>" autofocus required>
                         </div>
                         <hr>
                         <h6><b>Note:</b> You REALLY want a category whether from the list or one you type in yourself.</h6>
