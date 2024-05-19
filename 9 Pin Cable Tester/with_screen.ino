@@ -1,3 +1,8 @@
+//if you are not familiar with programming the arduino, 
+//you can find the software and instructions here:
+// https://www.arduino.cc/en/Guide/ArduinoNano
+
+
 // be sure to include the TM1637 library in the Arduino IDE
 #include <TM1637Display.h>
 

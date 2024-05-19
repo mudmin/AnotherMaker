@@ -1,3 +1,7 @@
+//if you are not familiar with programming the arduino, 
+//you can find the software and instructions here:
+// https://www.arduino.cc/en/Guide/ArduinoNano
+
 void setup()
 {
     // Initialize the serial port
