@@ -7,6 +7,7 @@ Arduino Nano - https://amzn.to/3ysygOz
 Optional parts:
 Female Headers for Nano & screen https://amzn.to/3UMBFPF
 7 Segment Display - https://amzn.to/4c25rqP
+Network cable tester - https://amzn.to/3K4ua1H
 
 //if you are not familiar with programming the arduino, 
 //you can find the software and instructions here:
