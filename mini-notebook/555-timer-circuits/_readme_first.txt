@@ -6,4 +6,10 @@ PCB #1 Includes
 Basic Monostable Circuit
 Basic Astable Circuit
 Frequency Divider
-Touch Sensor
+Touch-Activated Switch
+
+PCB #2 Includes
+Pulse Generator
+Voltage-Controlled Oscillator
+Bouncefree Switch
+Frequency Meter
