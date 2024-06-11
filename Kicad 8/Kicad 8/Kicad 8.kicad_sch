@@ -1498,6 +1498,102 @@
 				)
 			)
 		)
+		(symbol "power:GND"
+			(power)
+			(pin_numbers hide)
+			(pin_names
+				(offset 0) hide)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "#PWR"
+				(at 0 -6.35 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Value" "GND"
+				(at 0 -3.81 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_keywords" "global power"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "GND_0_1"
+				(polyline
+					(pts
+						(xy 0 0) (xy 0 -1.27) (xy 1.27 -1.27) (xy 0 -2.54) (xy -1.27 -1.27) (xy 0 -1.27)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "GND_1_1"
+				(pin power_in line
+					(at 0 0 270)
+					(length 0)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+		)
 	)
 	(junction
 		(at 219.71 290.83)
@@ -1686,12 +1782,6 @@
 		(uuid "6d0c90b9-893c-41be-a6dc-92a1c4f96058")
 	)
 	(junction
-		(at 237.49 25.4)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "70737502-6656-4ccf-923f-ade17f5dbb3c")
-	)
-	(junction
 		(at 205.74 135.89)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -1756,6 +1846,18 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "90b87696-006f-402b-a4b2-69bddd36f29f")
+	)
+	(junction
+		(at 237.49 25.4)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "91535096-53f6-44bd-bd40-e36321584dc0")
+	)
+	(junction
+		(at 214.63 22.86)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "918f65cc-242b-45fb-86ea-986cb29b12ad")
 	)
 	(junction
 		(at 214.63 30.48)
@@ -2066,6 +2168,16 @@
 			(type default)
 		)
 		(uuid "05d126b3-f864-4255-9757-11dc2213a7b1")
+	)
+	(wire
+		(pts
+			(xy 237.49 22.86) (xy 237.49 25.4)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "06ebb861-1d38-458a-81a1-da56baf7a5fe")
 	)
 	(wire
 		(pts
@@ -4469,16 +4581,6 @@
 	)
 	(wire
 		(pts
-			(xy 237.49 22.86) (xy 237.49 25.4)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "f72a1a66-89d2-488e-857c-222a2e66e501")
-	)
-	(wire
-		(pts
 			(xy 212.09 250.19) (xy 212.09 168.91)
 		)
 		(stroke
@@ -4700,7 +4802,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x05_P2.54mm_Vertical"
+		(property "Footprint" "Connector_PinSocket_2.54mm:PinSocket_1x05_P2.54mm_Vertical"
 			(at 260.35 27.94 0)
 			(effects
 				(font
@@ -4777,7 +4879,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Resistor_THT:R_Axial_DIN0204_L3.6mm_D1.6mm_P5.08mm_Horizontal"
+		(property "Footprint" "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal"
 			(at 226.06 38.608 90)
 			(effects
 				(font
@@ -4845,7 +4947,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x05_P2.54mm_Vertical"
+		(property "Footprint" "Connector_PinSocket_2.54mm:PinSocket_1x05_P2.54mm_Vertical"
 			(at 209.55 27.94 0)
 			(effects
 				(font
@@ -4891,6 +4993,73 @@
 			(project "Kicad 8"
 				(path "/f013cab0-cf41-4f46-b8e3-39a853954b51"
 					(reference "J7")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 214.63 22.86 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "545b82d8-0213-4295-85b4-560c6f92833a")
+		(property "Reference" "#PWR01"
+			(at 220.98 22.86 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 218.44 22.8599 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" ""
+			(at 214.63 22.86 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 214.63 22.86 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 214.63 22.86 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "cd5f6325-6206-42fd-8f1b-de654fa1ba5b")
+		)
+		(instances
+			(project ""
+				(path "/f013cab0-cf41-4f46-b8e3-39a853954b51"
+					(reference "#PWR01")
 					(unit 1)
 				)
 			)
@@ -5258,7 +5427,7 @@
 				)
 			)
 		)
-		(property "Footprint" "TerminalBlock_RND:TerminalBlock_RND_205-00018_1x08_P5.00mm_Horizontal"
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x08_P2.54mm_Vertical"
 			(at 200.66 138.43 0)
 			(effects
 				(font
@@ -5628,7 +5797,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x08_P2.54mm_Vertical"
+		(property "Footprint" "TerminalBlock_RND:TerminalBlock_RND_205-00018_1x08_P5.00mm_Horizontal"
 			(at 177.8 138.43 0)
 			(effects
 				(font
@@ -5782,7 +5951,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x05_P2.54mm_Vertical"
+		(property "Footprint" "Connector_PinSocket_2.54mm:PinSocket_1x05_P2.54mm_Vertical"
 			(at 232.41 27.94 0)
 			(effects
 				(font
