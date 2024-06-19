@@ -13,3 +13,28 @@ Pulse Generator
 Voltage-Controlled Oscillator
 Bouncefree Switch
 Frequency Meter
+
+PCB #3 Includes
+Event Failure Alarm
+Audio Oscillator / Metronome
+Toy Organ
+Tone Burst Generator
+
+To Do
+Timer Plus Relay
+Cascaded Timer
+Intervalometer
+Missing Pulse Detector
+Gated Oscillator
+Chirp Generator
+Stepped Tone Generator
+3 State Tone Generator
+Tone Burst Generator
+Sound Effects Generator
+LED Flasher
+Power FET Lamp Dimmer
+Light / Dark Detector
+Infrared Security Alarm
+Analog Lightwave Transmitter
+Analog Lightwave Receiver
+DC - DC Converter
