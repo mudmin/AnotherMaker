@@ -24,9 +24,12 @@ opencanaryd --copyconfig
 sudo nano /root/.opencanary.conf (orange pi)
 sudo nano /home/ubuntu/.opencanary.conf (raspberry pi)
 
-
 See this guide to setup email
 https://opencanary.readthedocs.io/en/latest/alerts/email.html
+
+IMPORTANT for UBUNTU!
+After making changes to /home/ubuntu/.opencanary.conf make sure to rename the file to "opencanary.conf" by removing the leading period.
+If you do not, then you will get an error when starting the canary stating the following: "Error: config does not have 'logger' section"
 
 opencanaryd --start
 
