@@ -6,7 +6,7 @@ PCB #1 Includes
 Basic Monostable Circuit
 Basic Astable Circuit
 Frequency Divider
-Touch-Activated Switch (Missing labels for TS-C1, TS-R1, and overlapping touch label. Gnd Jumper label cut off)
+Touch-Activated Switch (Missing labels for TS-C1 .01 103, TS-R1 100k, and overlapping touch label. Gnd Jumper label cut off)
 
 PCB #2 Includes
 Pulse Generator
