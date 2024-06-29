@@ -18,7 +18,8 @@ PCB #3 Includes
 Event Failure Alarm
 Audio Oscillator / Metronome
 Toy Organ
-Tone Burst Generator
+LED Flasher
+
 
 To Do
 Timer Plus Relay
@@ -31,7 +32,7 @@ Stepped Tone Generator
 3 State Tone Generator
 Tone Burst Generator
 Sound Effects Generator
-LED Flasher
+Tone Burst Generator
 Power FET Lamp Dimmer
 Light / Dark Detector
 Infrared Security Alarm
