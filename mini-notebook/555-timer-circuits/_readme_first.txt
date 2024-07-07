@@ -63,17 +63,28 @@ Stepped Tone Generator
 Cascaded Timer
 Intervalometer
 
-To Do
+PCB #5 Includes
 Timer Plus Relay
 Missing Pulse Detector
+Tone Burst Generator
+Light / Dark Detector
+
+PCB #6 Includes
+Analog Lightwave Transmitter
+Infrared Security Alarm
 Gated Oscillator
 Tone Burst Generator
-Sound Effects Generator
-Tone Burst Generator
-Power FET Lamp Dimmer
-Light / Dark Detector
-Infrared Security Alarm
-Analog Lightwave Transmitter
-Analog Lightwave Receiver
+
+PCB #7 Includes
 DC - DC Converter
+Power FET Lamp Dimmer
+Analog Lightwave Receiver
+Sound Effects Generator
+
+
+
+
+
+
+
 
