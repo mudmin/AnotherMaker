@@ -1,7 +1,7 @@
 IMPORTANT BOM NOTES
 This kit is about experimentation. Therefore resistors, capacitors and other components will be swapped out.  As such, in addition to the listed components, if you do not have them, you will want an assortment of these components
 
-Screw Terminal Blockx
+Screw Terminal Block
 https://amzn.to/462wUGT
 
 555 DIP - 8
