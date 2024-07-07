@@ -1,3 +1,18 @@
+IMPORTANT BOM NOTES
+This kit is about experimentation. Therefore resistors, capacitors and other components will be swapped out.  As such, in addition to the listed components, if you do not have them, you will want an assortment of these components
+
+Resistor Assortment
+https://amzn.to/3XRptAg
+
+Ceramic Capacitor Assortment
+https://amzn.to/3LzugiF
+
+Electrolytic Capacitor Assortment
+https://amzn.to/4bB3SiX
+
+Transistor Assortment
+https://amzn.to/3zJ0xRi
+
 An archive copy of the book can be found at
 https://archive.org/details/Forrest_Mims-engineers_mini-notebook_555_timer_circuits_radio_shack_electronics
 
@@ -20,16 +35,17 @@ Audio Oscillator / Metronome
 Toy Organ
 LED Flasher
 
-
-To Do
-Timer Plus Relay
-Cascaded Timer
-Intervalometer
-Missing Pulse Detector
-Gated Oscillator
+PCB #4 Includes
 Chirp Generator
 Stepped Tone Generator
 3 State Tone Generator
+Cascaded Timer
+Intervalometer
+
+To Do
+Timer Plus Relay
+Missing Pulse Detector
+Gated Oscillator
 Tone Burst Generator
 Sound Effects Generator
 Tone Burst Generator
@@ -39,3 +55,4 @@ Infrared Security Alarm
 Analog Lightwave Transmitter
 Analog Lightwave Receiver
 DC - DC Converter
+
