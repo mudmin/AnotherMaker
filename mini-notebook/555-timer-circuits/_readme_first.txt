@@ -51,10 +51,36 @@ Bouncefree Switch
 Frequency Meter
 
 PCB #3 Includes
-Event Failure Alarm
+Event Failure Alarm 
 Audio Oscillator / Metronome
-Toy Organ
+Toy Organ 
 LED Flasher
+PCB #3 v1.1 changes
+Toy Organ - (Fixed in rev 1.1 - Pin 2 needs to connect to the far side of R2, Pot is 100k)
+Event Failure Alarm - (Fixed in rev 1.1 EF-C1 is actually C2 in the book and should be .01uf or 103)
+
+
+Ideal
+C1 223 (0.022 µF) - C4, 262 Hz
+C2 203 (0.020 µF) - D4, 294 Hz
+C3 183 (0.018 µF) - E4, 330 Hz
+C4 163 (0.016 µF) - F4, 349 Hz
+C5 153 (0.015 µF) - G4, 392 Hz
+C6 133 (0.013 µF) - A4, 440 Hz
+C7 123 (0.012 µF) - B4, 494 Hz
+C9 113 (0.011 µF) - C5, 523 Hz
+
+Used
+C9 682 (0.068 µF) 
+C7 103 (0.01 µF)
+C6 153 (0.015 µF)
+C5 223 (0.022 µF)
+C4 333 (0.033 µF)
+C3 473 (0.047 µF)
+C2 683 (0.068 µF)
+C1 104 (0.1 µF)
+
+
 
 PCB #4 Includes
 Chirp Generator
