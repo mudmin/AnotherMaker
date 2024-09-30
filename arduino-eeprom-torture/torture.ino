@@ -1,55 +1,63 @@
 #include <EEPROM.h>
-//for loop
-int a = 1;
-int b = 1;
 
-int read = 0; // a place to store our read
-int step = 0; // either 0 or 1
-unsigned long counter = 0;
+#define HALT while(true){}
 
+// test paramiters
+#define TEST_SIZE 256
+#define PROMPT_COUNT 100
 
+// global values
+uint8_t gRead = 0; // an 8 bit global to to store the read value
+uint8_t gState = 0; // an 8 bit global state value to be written and compaired
+unsigned long gCounter = 0;
+
+// Prompt test setup
 void setup()
 {
- Serial.begin(9600);
- Serial.println("Booted");
- delay(5000); //for drama
+  Serial.begin(115200);
+  Serial.print("Booted EEPROM Size: ");
+  Serial.print(EEPROM.length())
+  Serial.print(" Test size: ");
+  Serial.print(TEST_SIZE);
+  serial.print(" Prompt every: ");
+  serial.print(PROMPT_COUNT);
+  serial.println(" Test cycles");
+  delay(500); //for (less) drama 
 }
 
-void loop(){
-  while(a == b){ //until it fails
+// main loop
+void loop () {
 
-    //write 256 to the eeprom
-    for (int i = 0; i <= 255; i++){
-      EEPROM.write(i, step); //address, value
+  // Flip the state bits
+  gState = ~gState;
+ 
+ // Display the test number every PROMPT_COUNT cycles
+  if(gCounter % PROMPT_COUNT == 0) {
+    Serial.print("Test No. ");
+    Serial.println(gCounter + 1);
+  }
+    //write TEST_LENGTH bytes to the EEPROM
+    for (int i = 0; i < TEST_SIZE; i++){
+      EEPROM.write(i, gState); //address, value
     }
 
     //read it back and make sure you're getting the right value
-    for (int i = 0; i <= 255; i++){
-      read = EEPROM.read(i); //address
-      if(read != step){
-        Serial.println("FAIIIIIIIIIIIIIIIIIIIIIL");
-        b = 0; //kill the loop
+    for (int i = 0; i < TEST_SIZE; i++){
+      gRead = EEPROM.read(i); //address
+      if(gRead != gState){
+        Serial.print("Failed Test No. ");
+        Serial.print(gCounter + 1);
+        Serial.print("Read Error at: ");
+        Serial.print(i);
+        Serial.print(" State Value: ");
+        Serial.print(gState);
+        Serial.print(" Read value: ");
+        Serial.print(gRead);
+        Serial.print(", Halting");
+
+       // halt
+        HALT
       }
     }
-    if(step == 0){
-      step = 1;
-    }else{
-      step = 0;
-    }
-
-    counter++;
-    Serial.print("Round ");
-    Serial.print(counter);
-    Serial.print(" successful - Step ");
-    Serial.println(step);
-
-
-    // //do a test run of just a few times time
-    //   if(counter >= 7){
-    //   b = 8;
-    // }
-
-  }
-
-
-}
+    gCounter++;
+} // main loop
