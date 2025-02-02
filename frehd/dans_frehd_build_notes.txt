@@ -1,3 +1,6 @@
+Update Feb 2, 2025
+I made a little tool that makes adding your own files to the frehd in bulk much easier.  Check out import.py and import.mp4 in the root directory.
+
 If you got a kit from me, all chips have been tested.
 The PIC and GAL chips have been preprogrammed.
 
