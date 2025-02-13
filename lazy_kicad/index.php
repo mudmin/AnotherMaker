@@ -79,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>KiCad Net Label Generator by AnotherMaker</title>
+  <title>KiCad Lazy Label Generator by AnotherMaker</title>
   <!-- Bootstrap 5 CSS CDN -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- jQuery CDN -->
@@ -90,7 +90,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
 <div class="container my-5">
-  <h1 class="mb-4">KiCad Net Label Generator by AnotherMaker</h1>
+  <h1 class="mb-4">KiCad Lazy Label Generator by AnotherMaker</h1>
+  <p>Enter your parameters for your net labels.  You may create multiple sets in one schematic file.  When you are ready, click generate.  Download the schematic.  Open it in kicad. Select your labels, copy, and past them into your real schematic. The whole process takes less than a minute.</p>
   <form method="post" id="labelForm">
     <div id="cardContainer">
       <?php if ($_SERVER['REQUEST_METHOD'] === 'POST'): 
