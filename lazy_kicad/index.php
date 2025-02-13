@@ -92,6 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="container my-5">
   <h1 class="mb-4">KiCad Lazy Label Generator by AnotherMaker</h1>
   <p>Enter your parameters for your net labels.  You may create multiple sets in one schematic file.  When you are ready, click generate.  Download the schematic.  Open it in kicad. Select your labels, copy, and past them into your real schematic. The whole process takes less than a minute.</p>
+  <p>If you appreciate my work, feel free to donate over at <a href="https://userspice.com/donate">https://userspice.com/donate</a>.</p>
   <form method="post" id="labelForm">
     <div id="cardContainer">
       <?php if ($_SERVER['REQUEST_METHOD'] === 'POST'): 
