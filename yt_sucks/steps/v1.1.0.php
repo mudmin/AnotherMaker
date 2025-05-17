@@ -1,7 +1,7 @@
 <?php
 session_start();
-$version = "2.0.0";
-$date = "May 17, 2025";
+$version = "1.1.0";
+$date = "May 4, 2024";
 
 // Generate CSRF token and store it in session
 if (!isset($_SESSION['csrf_token'])) {
@@ -129,10 +129,6 @@ if ($error === 'invalid_url') {
                         <div class="mb-3">
                             <label for="search" class="form-label">Enter a link to one video from the channel you want to play</label>
                             <input type="text" class="form-control" id="video" name="video" autofocus required>
-                            <div class="input-group">
-                            <input type="checkbox"  id="include_shorts" name="include_shorts" value="1"> Include YouTube Shorts
-                            </div>
-                          
                         </div>
                         <button type="submit" class="btn btn-primary">Go</button>
                     </form>
