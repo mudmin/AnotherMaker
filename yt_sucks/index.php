@@ -48,10 +48,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Check if the URL starts with "https://www.youtube" or "https://youtube"
     if (strpos($url, 'https://www.youtube') !== 0 && strpos($url, 'https://youtube') !== 0) {
-
         header("Location: " . $_SERVER['PHP_SELF'] . "?error=invalid_url");
         exit();
     }
+    
     //throw away anything after and including the first "&"
     $url = explode("&", $url)[0];
     $content = htmlspecialchars(file_get_contents($url));
@@ -64,23 +64,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         return strlen($uc) <= 25;
     });
 
-
     // Count the occurrences of each unique valid UC code
     $channelCounts = array_count_values($validUCs);
-
-    // Debug to display channel counts
-    // dnd($channelCounts);
 
     // Check if there are any channel IDs found
     if (!empty($channelCounts)) {
         // Get the most frequent channel ID
         $mostFrequentChannel = array_keys($channelCounts, max($channelCounts))[0];
 
-        // Modify the channel ID if necessary
+        // Modify the channel ID
         $modifiedChannelId = "UU" . $mostFrequentChannel;
+        
+        // If include_shorts is NOT checked, use UULF instead of UU to filter out shorts
+        if (!isset($_POST['include_shorts']) || $_POST['include_shorts'] != '1') {
+            $modifiedChannelId = "UULF" . $mostFrequentChannel;
+        }
 
-        // Redirect to the original URL with the modified list parameter
-        header("Location: $url&list=$modifiedChannelId");
+        // Create the final URL
+        $finalUrl = $url . "&list=" . $modifiedChannelId;
+        
+        // If start_at_beginning is checked, add index=1
+        // if (isset($_POST['start_at_beginning']) && $_POST['start_at_beginning'] == '1') {
+        //     $finalUrl .= "&index=1";
+        // }
+
+        // Redirect to the modified URL
+        header("Location: $finalUrl");
         exit();
     }
 
@@ -98,6 +107,7 @@ if ($error === 'invalid_url') {
     $errorMsg = 'YouTube Channel ID not found.';
 }
 ?>
+
 <!doctype html>
 <html lang="en">
 
@@ -129,10 +139,20 @@ if ($error === 'invalid_url') {
                         <div class="mb-3">
                             <label for="search" class="form-label">Enter a link to one video from the channel you want to play</label>
                             <input type="text" class="form-control" id="video" name="video" autofocus required>
-                            <div class="input-group">
-                            <input type="checkbox"  id="include_shorts" name="include_shorts" value="1"> Include YouTube Shorts
+                            <div class="input-group pt-2 pb-1">
+                                <input type="checkbox"
+                                    class="form-check-input"
+                                    id="include_shorts" name="include_shorts" value="1">
+                                <label for="include_shorts" class="ms-2">
+                                    Include YouTube Shorts
+                                </label>
                             </div>
-                          
+                            <!-- <div class="input-group pt-2 pb-1">
+
+                                <input type="checkbox" name="start_at_beginning" class="form-check-input" id="start_at_beginning" value="1">
+                                <label for="start_at_beginning" class="ms-2">Start at the beginning of the channel</label>
+                            </div> -->
+
                         </div>
                         <button type="submit" class="btn btn-primary">Go</button>
                     </form>
