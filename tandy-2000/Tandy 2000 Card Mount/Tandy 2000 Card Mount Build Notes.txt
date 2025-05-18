@@ -1,0 +1,20 @@
+Tandy 2000 Cards mount with these (easily breakable) plastic clips.  The clips are small enough that 3d printing replacements are impractical. There's just not enough plastic for PLA to be strong. 
+
+I devised this system to replace the mounts.  There are 3 options. 
+1. A version that uses wood/machine screws 
+2. A brass heat set inset version that uses M3 Screws and M3*4*4.2 Inserts
+3. A brass heat set inset version that uses M4 Screws and M4*6*6 Inserts
+
+Option 1 requires just a 3d printer.  Option 2 is nice because it deals with the variance in Tandy 2000 systems. Smaller screws = more room for holes to not line up. Option 3 worked on both my systems and uses stronger, larger screws (albeit with less meat on the sides).
+
+The inserts (and insert tool) that I used - https://amzn.to/43Jk4Nd
+
+IMPORTANT
+When looking at the right side of the system, there is less room for the mount to slide in.  My preference is to take the entire stabilizer brace off the top and slide the right mount in from the top as if you're sliding it in a slot.  The left side is more forgiving.   The stabilizer bar goes BETWEEN the mount and the card cage.  
+
+The system works with the stock screws.  The mount only needs to be loosely attached to the bar. That screw is primarily there so it does not fall while you're installing the cards.  If you have longer matching screws, you can add a washer for some additional strength on those top tabs.
+
+In the event your heat set holes don't line up, you can install the mount and do minor adjustments before you put the card in. Just put the iron back in and wiggle a little.
+
+Photos
+See photos for install guide and how to print. I like printing these with no bed adhesion as oriented in the photo.  Then use a pin or cricut tool to pull the supports out of the insert holes.
