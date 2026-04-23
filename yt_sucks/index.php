@@ -1,43 +1,118 @@
 <?php
-session_start();
-$version = "2.0.1";
-$date = "Oct 4, 2025";
+$isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+    || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https')
+    || (($_SERVER['SERVER_PORT'] ?? '') == 443);
 
-//
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path' => '/',
+    'secure' => $isHttps,
+    'httponly' => true,
+    'samesite' => 'Lax',
+]);
+session_start();
+
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: DENY');
+header('Referrer-Policy: strict-origin-when-cross-origin');
+header(
+    "Content-Security-Policy: default-src 'self'; "
+    . "img-src 'self' https://img.youtube.com data:; "
+    . "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+    . "script-src 'self' https://cdn.jsdelivr.net; "
+    . "connect-src 'self' https://cdn.jsdelivr.net; "
+    . "form-action 'self' https://www.youtube.com https://youtube.com https://m.youtube.com https://music.youtube.com https://youtu.be; "
+    . "base-uri 'self'; "
+    . "frame-ancestors 'none'"
+);
+
+$version = "3.0.2";
+$date = "April 23, 2026";
+
+/**
+ * Verifies a URL's host is on the YouTube allowlist.
+ * @param string $url
+ * @return bool
+ */
+function is_youtube_url($url)
+{
+    $host = parse_url($url, PHP_URL_HOST);
+    if (!is_string($host) || $host === '') {
+        return false;
+    }
+    $scheme = parse_url($url, PHP_URL_SCHEME);
+    if (strtolower((string)$scheme) !== 'https') {
+        return false;
+    }
+    $allowed = ['www.youtube.com', 'youtube.com', 'm.youtube.com', 'music.youtube.com', 'youtu.be'];
+    return in_array(strtolower($host), $allowed, true);
+}
+
 /**
  * Fetches the content of a remote URL using cURL.
  * @param string $url The URL to fetch.
  * @return string|false The content of the URL on success, or false on failure.
  */
 function curl_get_contents($url) {
-    $ch = curl_init();
-    
-    // Set cURL options
-    curl_setopt($ch, CURLOPT_URL, $url);
-    // Return the transfer as a string instead of outputting it directly
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    // Follow any redirects
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-    // Include the header in the output (we don't need this, so set to false)
-    curl_setopt($ch, CURLOPT_HEADER, 0);
-    // Set a timeout to prevent endless script execution
-    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
-    // Required for HTTPS to work properly
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-    
-    // Execute the request
-    $content = curl_exec($ch);
-    
-    // Check for errors (optional, but good practice)
-    if (curl_errno($ch)) {
-        // You might log this error instead of returning false immediately
-        // error_log("cURL Error: " . curl_error($ch));
-        curl_close($ch);
+    if (!is_youtube_url($url)) {
         return false;
     }
-    
+
+    $maxBytes = 5 * 1024 * 1024; // 5 MB cap
+    $buffer = '';
+    $tooLarge = false;
+
+    $ch = curl_init();
+
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
+    curl_setopt($ch, CURLOPT_HEADER, 0);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+    curl_setopt($ch, CURLOPT_PROTOCOLS, CURLPROTO_HTTPS);
+    curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $data) use (&$buffer, &$tooLarge, $maxBytes) {
+        $buffer .= $data;
+        if (strlen($buffer) > $maxBytes) {
+            $tooLarge = true;
+            return 0; // abort
+        }
+        return strlen($data);
+    });
+
+    // Manual redirect handling, re-validating host on each hop.
+    $currentUrl = $url;
+    $maxRedirects = 5;
+    for ($i = 0; $i <= $maxRedirects; $i++) {
+        curl_setopt($ch, CURLOPT_URL, $currentUrl);
+        $buffer = '';
+        $tooLarge = false;
+        curl_exec($ch);
+
+        if ($tooLarge || curl_errno($ch)) {
+            curl_close($ch);
+            return false;
+        }
+
+        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        if ($code >= 300 && $code < 400) {
+            $next = curl_getinfo($ch, CURLINFO_REDIRECT_URL);
+            if (!is_string($next) || $next === '' || !is_youtube_url($next)) {
+                curl_close($ch);
+                return false;
+            }
+            $currentUrl = $next;
+            continue;
+        }
+
+        curl_close($ch);
+        return $buffer;
+    }
+
     curl_close($ch);
-    return $content;
+    return false;
 }
 // ---------------------------------
 
@@ -45,29 +120,6 @@ function curl_get_contents($url) {
 if (!isset($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
-
-if (!function_exists('dump')) {
-    function dump($var)
-    {
-        if (is_array($var) || is_object($var)) {
-            echo '<pre>';
-            print_r($var);
-            echo '</pre>';
-        } else {
-            echo $var;
-        }
-    }
-}
-
-if (!function_exists('dnd')) {
-    function dnd($var)
-    {
-
-        dump($var);
-        die();
-    }
-}
-
 
 // Validate CSRF token
 function validate_csrf_token($token)
@@ -81,24 +133,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         die("CSRF token validation failed!");
     }
 
-    // Get the URL input
-    $url = $_POST["video"];
-
-    // Check if the URL starts with "https://www.youtube" or "https://youtube"
-    if (strpos($url, 'https://www.youtube') !== 0 && strpos($url, 'https://youtube') !== 0) {
-        header("Location: " . $_SERVER['PHP_SELF'] . "?error=invalid_url");
+    // Get the URL input, stripping CRLF to prevent header injection.
+    $url = is_string($_POST["video"] ?? null) ? $_POST["video"] : '';
+    $url = str_replace(["\r", "\n", "\0"], '', $url);
+    // Cap length to prevent absurdly long inputs.
+    if (strlen($url) > 2048) {
+        header("Location: " . $_SERVER['SCRIPT_NAME'] . "?error=invalid_url");
         exit();
     }
-    
+
+    if (!is_youtube_url($url)) {
+        header("Location: " . $_SERVER['SCRIPT_NAME'] . "?error=invalid_url");
+        exit();
+    }
+
     //throw away anything after and including the first "&"
     $url = explode("&", $url)[0];
-    
 
     $remote_content = curl_get_contents($url);
 
     if ($remote_content === false) {
         // cURL failed to fetch the page
-        header("Location: " . $_SERVER['PHP_SELF'] . "?error=fetch_failed");
+        header("Location: " . $_SERVER['SCRIPT_NAME'] . "?error=fetch_failed");
         exit();
     }
 
@@ -128,19 +184,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if (!isset($_POST['include_shorts']) || $_POST['include_shorts'] != '1') {
             $prefix = "UULF";
         }
-        
+
         $modifiedChannelId = $prefix . $mostFrequentChannel;
 
         // Create the final URL
         $finalUrl = $url . "&list=" . $modifiedChannelId;
-        
+
         // Redirect to the modified URL
         header("Location: $finalUrl");
         exit();
     }
 
     // Redirect with an error message if no valid channel IDs found
-    header("Location: " . $_SERVER['PHP_SELF'] . "?error=channel_id_not_found");
+    header("Location: " . $_SERVER['SCRIPT_NAME'] . "?error=channel_id_not_found");
     exit();
 }
 
