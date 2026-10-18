@@ -252,6 +252,22 @@ function yt_grid_page($data)
 }
 
 /**
+ * Finds the first video in a playlist from its playlist page.
+ * @param string $playlistId e.g. UULP... or UUSH...
+ * @return string|null The video ID, or null if the page couldn't be read
+ */
+function playlist_first_video($playlistId)
+{
+    $html = curl_get_contents('https://www.youtube.com/playlist?list=' . rawurlencode($playlistId) . '&hl=en');
+    $start = $html === false ? false : strpos($html, 'var ytInitialData = ');
+    // The first video ID in the page data is the top entry of the list.
+    if ($start !== false && preg_match('/"videoId":"([\w-]{11})"/', $html, $m, 0, $start)) {
+        return $m[1];
+    }
+    return null;
+}
+
+/**
  * Turns a "Latest" sort-chip token from a channel's Videos tab into an
  * "Oldest" one. Channels with memberships show Latest / Members only / Public
  * chips instead of Latest / Popular / Oldest, but the browse API still accepts
@@ -487,8 +503,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Start at the pasted video and keep going through the channel.
         $finalUrl = $videoUrl . "&list=" . $playlistId;
     } else {
-        // Start at the top of the list (e.g. the most popular video).
-        $finalUrl = "https://www.youtube.com/watch?list=" . $playlistId;
+        // Start at the top of the list (e.g. the most popular video). YouTube
+        // won't autoplay watch?list= without a v=, so look up the first video.
+        $firstId = playlist_first_video($playlistId);
+        $finalUrl = $firstId
+            ? "https://www.youtube.com/watch?v=" . $firstId . "&list=" . $playlistId
+            : "https://www.youtube.com/playlist?list=" . $playlistId;
     }
 
     // Redirect to the modified URL
